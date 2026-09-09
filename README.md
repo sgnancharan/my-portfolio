@@ -11,7 +11,7 @@
 
 **Autonomous 3D Spatial Computing Portfolio & Systems Infrastructure Showcase**
 
-[Explore Live Demo](https://sgnancharan.vercel.app) · [Report Bug](https://github.com/sgnancharan/s-gnan-charan/issues) · [Contact Operator](mailto:sgnancharan730@gmail.com)
+[Explore Live Demo](https://s-gnan-charan-portfolio.vercel.app) · [Report Bug](https://github.com/sgnancharan/s-gnan-charan/issues) · [Contact Operator](mailto:sgnancharan730@gmail.com)
 
 </div>
 
