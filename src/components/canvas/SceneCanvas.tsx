@@ -29,20 +29,20 @@ function SceneContents({ starCount }: { starCount: number }) {
 
   // Preload background cosmos behind the orange wall as camera enters thruster
   const showCosmos = snap.isComplete || snap.heroPreloaded || snap.cosmosLoaded > 0.5;
-  const isLight = theme === "light" && snap.isComplete;
+  const isLight = theme === "light";
 
-  const bgColor = isLight ? "#f0f4f8" : "#05070c";
-  const fogNear = isLight ? 14 : 12;
-  const fogFar = isLight ? 42 : 36;
+  const bgColor = isLight ? "#f4f7fb" : "#05070c";
+  const fogNear = isLight ? 16 : 12;
+  const fogFar = isLight ? 48 : 36;
 
   return (
     <>
       <color attach="background" args={[bgColor]} />
       <fog attach="fog" args={[bgColor, fogNear, fogFar]} />
-      <ambientLight intensity={isLight ? 0.65 : 0.18} />
+      <ambientLight intensity={isLight ? 0.75 : 0.18} />
       <directionalLight
-        position={[6, 8, 4]}
-        intensity={isLight ? 0.95 : 0.55}
+        position={[8, 12, 6]}
+        intensity={isLight ? 1.15 : 0.55}
         color={isLight ? "#ffffff" : "#d7e6f2"}
       />
       <directionalLight

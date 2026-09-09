@@ -6,6 +6,7 @@ import { useRef, useSyncExternalStore } from "react";
 import { DoubleSide, Group, Mesh } from "three";
 import { viewportState } from "@/lib/scroll-state";
 import { identityInteraction, subscribeIdentity } from "@/lib/identity-state";
+import { useTheme } from "@/components/providers/ThemeProvider";
 
 interface CosmicNodeDef {
   name: string;
@@ -39,6 +40,8 @@ const COSMIC_ITEMS: CosmicNodeDef[] = [
 ];
 
 export function CosmicNexus() {
+  const { theme } = useTheme();
+  const isLight = theme === "light";
   const root = useRef<Group>(null);
   const rings = useRef<(Mesh | null)[]>([]);
 
@@ -97,25 +100,29 @@ export function CosmicNexus() {
 
           {/* Facing 3D Label & Category Indicator */}
           <Billboard follow lockX={false} lockY={false} lockZ={false}>
-            <group position={[0, item.size + 0.32, 0]}>
+            <group position={[0, item.size + 0.3, 0]}>
               <Text
-                fontSize={0.19}
-                letterSpacing={0.12}
-                color="#f8fafc"
+                font="/fonts/segoe-bold.ttf"
+                fontSize={0.15}
+                letterSpacing={0.08}
+                color={isLight ? "#090d16" : "#f8fafc"}
                 anchorX="center"
                 anchorY="middle"
-                outlineWidth={0.03}
-                outlineColor="#020617"
+                outlineWidth={0.004}
+                outlineColor={isLight ? "#ffffff" : "#020617"}
               >
                 {item.name}
               </Text>
               <Text
-                position={[0, -0.19, 0]}
-                fontSize={0.1}
-                letterSpacing={0.2}
-                color={item.color}
+                font="/fonts/segoe-bold.ttf"
+                position={[0, -0.16, 0]}
+                fontSize={0.085}
+                letterSpacing={0.18}
+                color={isLight ? (item.category === "SKILL" ? "#0369a1" : "#7c3aed") : item.color}
                 anchorX="center"
                 anchorY="middle"
+                outlineWidth={0.002}
+                outlineColor={isLight ? "#ffffff" : "#020617"}
               >
                 [{item.category}]
               </Text>

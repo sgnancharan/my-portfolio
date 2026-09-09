@@ -48,6 +48,10 @@ export function IsroLaunchComplex() {
   const umbilicalArm1Ref = useRef<Group>(null);
   const umbilicalArm2Ref = useRef<Group>(null);
   const flameGroupRef = useRef<Group>(null);
+  const leftBoosterRef = useRef<Group>(null);
+  const rightBoosterRef = useRef<Group>(null);
+  const leftBoosterFlameRef = useRef<Group>(null);
+  const rightBoosterFlameRef = useRef<Group>(null);
   const launchLightRef = useRef<Group>(null);
   const groundSmokeRef = useRef<Group>(null);
   const transitionPointsRef = useRef<Points>(null);
@@ -247,6 +251,40 @@ export function IsroLaunchComplex() {
         posAttr.needsUpdate = true;
         colAttr.needsUpdate = true;
       }
+    }
+
+    // 6. Realistic S200 Solid Rocket Booster Stage Separation
+    // Occurs at altitude before camera dives into core Vikas engines
+    const sep = snap.stageSeparation || 0;
+    if (leftBoosterRef.current) {
+      leftBoosterRef.current.position.x = -1.15 - sep * 4.4;
+      leftBoosterRef.current.position.y = -0.3 - sep * 3.2;
+      leftBoosterRef.current.position.z = -sep * 1.0;
+      leftBoosterRef.current.rotation.z = sep * 0.42;
+      leftBoosterRef.current.rotation.y = sep * 0.18;
+    }
+    if (rightBoosterRef.current) {
+      rightBoosterRef.current.position.x = 1.15 + sep * 4.4;
+      rightBoosterRef.current.position.y = -0.3 - sep * 3.2;
+      rightBoosterRef.current.position.z = -sep * 1.0;
+      rightBoosterRef.current.rotation.z = -sep * 0.42;
+      rightBoosterRef.current.rotation.y = -sep * 0.18;
+    }
+    if (leftBoosterFlameRef.current) {
+      leftBoosterFlameRef.current.position.x = -1.15 - sep * 4.4;
+      leftBoosterFlameRef.current.position.y = -0.3 - sep * 3.2;
+      leftBoosterFlameRef.current.position.z = -sep * 1.0;
+      leftBoosterFlameRef.current.rotation.z = sep * 0.42;
+      const bFlameScale = Math.max(0, 1 - sep * 2.2);
+      leftBoosterFlameRef.current.scale.set(bFlameScale, bFlameScale, bFlameScale);
+    }
+    if (rightBoosterFlameRef.current) {
+      rightBoosterFlameRef.current.position.x = 1.15 + sep * 4.4;
+      rightBoosterFlameRef.current.position.y = -0.3 - sep * 3.2;
+      rightBoosterFlameRef.current.position.z = -sep * 1.0;
+      rightBoosterFlameRef.current.rotation.z = -sep * 0.42;
+      const bFlameScale = Math.max(0, 1 - sep * 2.2);
+      rightBoosterFlameRef.current.scale.set(bFlameScale, bFlameScale, bFlameScale);
     }
   });
 
@@ -519,7 +557,7 @@ export function IsroLaunchComplex() {
 
         {/* --- Twin S200 Solid Rocket Boosters (Strapped to Sides) --- */}
         {/* Left S200 Booster */}
-        <group position={[-1.15, -0.3, 0]}>
+        <group ref={leftBoosterRef} position={[-1.15, -0.3, 0]}>
           <mesh position={[0, 0, 0]}>
             <cylinderGeometry args={[0.44, 0.44, 5.4, 24]} />
             <meshStandardMaterial
@@ -567,7 +605,7 @@ export function IsroLaunchComplex() {
         </group>
 
         {/* Right S200 Booster */}
-        <group position={[1.15, -0.3, 0]}>
+        <group ref={rightBoosterRef} position={[1.15, -0.3, 0]}>
           <mesh position={[0, 0, 0]}>
             <cylinderGeometry args={[0.44, 0.44, 5.4, 24]} />
             <meshStandardMaterial
@@ -618,11 +656,11 @@ export function IsroLaunchComplex() {
         <group position={[0, -2.3, 0]}>
           <mesh position={[-0.26, 0, 0]} rotation={[Math.PI, 0, 0]}>
             <cylinderGeometry args={[0.16, 0.28, 0.48, 16]} />
-            <meshStandardMaterial color="#1e293b" metalness={0.85} roughness={0.25} />
+            <meshStandardMaterial color="#1e293b" metalness={0.9} roughness={0.2} />
           </mesh>
           <mesh position={[0.26, 0, 0]} rotation={[Math.PI, 0, 0]}>
             <cylinderGeometry args={[0.16, 0.28, 0.48, 16]} />
-            <meshStandardMaterial color="#1e293b" metalness={0.85} roughness={0.25} />
+            <meshStandardMaterial color="#1e293b" metalness={0.9} roughness={0.2} />
           </mesh>
         </group>
 
@@ -631,7 +669,7 @@ export function IsroLaunchComplex() {
             ======================================================== */}
         <group ref={flameGroupRef} position={[0, -3.2, 0]} visible={false}>
           {/* Left S200 Booster Flame Jet */}
-          <group position={[-1.15, -0.3, 0]}>
+          <group ref={leftBoosterFlameRef} position={[-1.15, -0.3, 0]}>
             {/* Inner Core Flame (Incandescent White) */}
             <mesh position={[0, -1.6, 0]} rotation={[Math.PI, 0, 0]}>
               <coneGeometry args={[0.32, 3.4, 16]} />
@@ -657,7 +695,7 @@ export function IsroLaunchComplex() {
           </group>
 
           {/* Right S200 Booster Flame Jet */}
-          <group position={[1.15, -0.3, 0]}>
+          <group ref={rightBoosterFlameRef} position={[1.15, -0.3, 0]}>
             <mesh position={[0, -1.6, 0]} rotation={[Math.PI, 0, 0]}>
               <coneGeometry args={[0.32, 3.4, 16]} />
               <meshBasicMaterial color="#ffffff" transparent opacity={0.95} blending={AdditiveBlending} />

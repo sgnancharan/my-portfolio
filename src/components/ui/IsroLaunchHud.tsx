@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 import { OrangeZipTearOverlay } from "@/components/ui/OrangeZipTearOverlay";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { useTheme } from "@/components/providers/ThemeProvider";
 import {
   getLaunchIntroSnapshot,
   skipLaunchIntro,
@@ -10,6 +12,8 @@ import {
 } from "@/lib/launch-intro-state";
 
 export function IsroLaunchHud() {
+  const { theme } = useTheme();
+  const isLight = theme === "light";
   const [mounted, setMounted] = useState(false);
   const [snap, setSnap] = useState(() => getLaunchIntroSnapshot());
 
@@ -42,11 +46,14 @@ export function IsroLaunchHud() {
   // "everyhud should dissapear from on the screen and load directly the hero section"
   const isHudActive = snap.hudVisible && snap.orangeWall < 0.65;
 
+  // Active checking subsystem (for mobile compact ticker)
+  const activeCheckingSys = snap.systems.find((s) => s.status === "CHECKING");
+  const goCount = snap.systems.filter((s) => s.status === "GO").length;
+
   return (
     <>
       {/* ========================================================
-          1. RADIANT ORANGE SCREEN WALL WITH BOTTOM-MIDDLE UNZIPPING TEAR
-          "after the orange fill out the entire screen it will tear from bottom middle and seperate like opening zip without zipper to reveal the hero section of the website"
+          1. RADIANT ORANGE SCREEN WALL WITH BOTTOM-UP INVERTED V TEAR
           ======================================================== */}
       <OrangeZipTearOverlay
         orangeWall={snap.orangeWall}
@@ -54,8 +61,7 @@ export function IsroLaunchHud() {
       />
 
       {/* ========================================================
-          2. MISSION CONTROL HUD
-          "everyhud should dissapear from on the screen and load directly the hero section"
+          2. MISSION CONTROL HUD (SCALABLE DESKTOP & MOBILE)
           ======================================================== */}
       {isHudActive && (
         <div
@@ -64,53 +70,130 @@ export function IsroLaunchHud() {
           aria-label="ISRO Sriharikota Launch Mission Control HUD"
         >
           {/* Top Mission Telemetry Header */}
-          <header className="absolute top-0 inset-x-0 p-4 sm:p-6 flex items-start justify-between text-[10px] sm:text-xs text-cyan-200/80 tracking-[0.2em] uppercase">
+          <header
+            className={`absolute top-0 inset-x-0 p-3 sm:p-6 flex items-start justify-between text-[9px] sm:text-xs tracking-[0.18em] sm:tracking-[0.2em] uppercase ${
+              isLight ? "text-slate-700" : "text-cyan-200/80"
+            }`}
+          >
             {/* Left: Launch Complex Location */}
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
-                <span className="font-semibold text-slate-100 tracking-[0.25em]">
+            <div className="flex flex-col gap-0.5 sm:gap-1">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping shrink-0" />
+                <span
+                  className={`tracking-[0.2em] sm:tracking-[0.25em] font-extrabold ${
+                    isLight ? "text-sky-700" : "text-cyan-300"
+                  }`}
+                >
                   SDSC SHAR // SRIHARIKOTA
                 </span>
               </div>
-              <span className="text-slate-400 text-[9px] sm:text-[10px]">
-                LC-2 · 13.7199° N, 80.2304° E · AZ 104° SE
+              <span className={isLight ? "text-amber-700 text-[8px] sm:text-[10px] font-bold" : "text-amber-300 text-[8px] sm:text-[10px]"}>
+                <span className="hidden sm:inline">LC-2 · 13.7199° N, 80.2304° E · AZ 104° SE</span>
+                <span className="sm:hidden">LC-2 · SHAR COMPLEX</span>
               </span>
             </div>
 
-            {/* Center: Mission Mode */}
+            {/* Center: Mission Mode (Desktop only) */}
             <div className="hidden md:flex flex-col items-center">
-              <span className="px-3 py-1 rounded-full border border-cyan-400/30 bg-cyan-950/40 text-[9.5px] text-cyan-300">
+              <span
+                className={`px-3 py-1 rounded-full text-[9.5px] ${
+                  isLight
+                    ? "border border-amber-400 bg-white/95 text-amber-700 font-black shadow-sm"
+                    : "border border-cyan-400/30 bg-cyan-950/40 text-cyan-300"
+                }`}
+              >
                 INDIAN SPACE RESEARCH ORGANISATION
               </span>
-              <span className="text-[8.5px] text-slate-400 mt-1 tracking-[0.3em]">
+              <span className={`text-[8.5px] mt-1 tracking-[0.3em] font-bold ${isLight ? "text-sky-700" : "text-cyan-200"}`}>
                 LAUNCH VEHICLE // LVM3 HEAVY LIFTER
               </span>
             </div>
 
-            {/* Right: Telemetry Carrier Lock */}
-            <div className="flex flex-col items-end gap-1 text-right">
-              <div className="flex items-center gap-2">
-                <span className="text-emerald-400 font-medium">S-BAND 2240MHz</span>
-                <span className="px-1.5 py-0.5 rounded text-[8px] bg-emerald-950/70 border border-emerald-500/40 text-emerald-300">
+            {/* Right: Telemetry Carrier Lock & Time counter */}
+            <div className="flex flex-col items-end gap-0.5 sm:gap-1 text-right">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className={isLight ? "text-emerald-700 font-black" : "text-emerald-400 font-medium"}>
+                  S-BAND 2.2GHz
+                </span>
+                <span
+                  className={`px-1 py-0.2 sm:px-1.5 sm:py-0.5 rounded text-[7.5px] sm:text-[8px] font-black ${
+                    isLight
+                      ? "bg-emerald-100 border border-emerald-400 text-emerald-800"
+                      : "bg-emerald-950/70 border border-emerald-500/40 text-emerald-300"
+                  }`}
+                >
                   LOCK
                 </span>
               </div>
-              <span className="text-slate-400 text-[9px] sm:text-[10px]">
+              <span className={isLight ? "text-amber-700 text-[8.5px] sm:text-[10px] font-black" : "text-amber-300 text-[8.5px] sm:text-[10px]"}>
                 {snap.phase === "LIFTOFF"
-                  ? `MET +00:00:${Math.min(99, Math.floor(snap.rocketY * 2.8)).toString().padStart(2, "0")}`
+                  ? `MET +00:${Math.min(99, Math.floor(snap.rocketY * 2.8)).toString().padStart(2, "0")}`
                   : snap.countdown >= 0
-                  ? `T -00:00:0${snap.countdown}`
-                  : "T-HOLD // STANDBY"}
+                  ? `T -00:0${snap.countdown}`
+                  : "STANDBY"}
               </span>
             </div>
           </header>
 
-          {/* Left Subsystem Diagnostic Checks */}
-          <div className="absolute left-4 sm:left-8 top-24 sm:top-28 w-60 sm:w-72 flex flex-col gap-2">
-            <div className="border-b border-cyan-400/20 pb-1.5 flex items-center justify-between text-[9px] uppercase tracking-[0.25em] text-cyan-300/70">
+          {/* ========================================================
+              MOBILE-OPTIMIZED TELEMETRY & STATUS STRIP (< 768px)
+              Prevents overlap while keeping rocket in full view
+              ======================================================== */}
+          <div className="md:hidden absolute top-14 inset-x-3 flex flex-col gap-2 z-40 pointer-events-none">
+            {/* Subsystem Auto-Check Ticker Bar */}
+            <div
+              className={`p-2 rounded-xl border backdrop-blur-md flex items-center justify-between transition-all duration-200 ${
+                snap.allSystemsGo
+                  ? isLight
+                    ? "border-emerald-500 bg-emerald-50/95 text-emerald-800 shadow-sm"
+                    : "border-emerald-400 bg-emerald-950/70 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.3)]"
+                  : isLight
+                  ? "border-sky-300 bg-white/95 text-slate-800 shadow-sm"
+                  : "border-cyan-500/30 bg-slate-950/75 text-cyan-200"
+              }`}
+            >
+              <div className="flex items-center gap-2 text-[9px] font-bold tracking-wider">
+                <span className={`h-2 w-2 rounded-full ${snap.allSystemsGo ? "bg-emerald-400" : "bg-amber-400 animate-ping"}`} />
+                <span>
+                  {snap.allSystemsGo
+                    ? "ALL 7 SUBSYSTEMS VERIFIED // GO"
+                    : activeCheckingSys
+                    ? `VERIFYING: ${activeCheckingSys.name}`
+                    : "AUTONOMOUS DIAGNOSTICS"}
+                </span>
+              </div>
+
+              {/* 7 Micro Status LED Dots */}
+              <div className="flex items-center gap-1">
+                {snap.systems.map((sys) => (
+                  <span
+                    key={sys.id}
+                    className={`h-1.5 w-1.5 rounded-full transition-all duration-300 ${
+                      sys.status === "GO"
+                        ? "bg-emerald-400 shadow-[0_0_6px_#34d399]"
+                        : sys.status === "CHECKING"
+                        ? "bg-amber-400 animate-pulse"
+                        : isLight
+                        ? "bg-slate-300"
+                        : "bg-slate-700"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* ========================================================
+              DESKTOP LEFT SUBSYSTEM CHECKLIST (>= 768px)
+              ======================================================== */}
+          <div className="hidden md:flex absolute left-4 sm:left-8 top-24 sm:top-28 w-60 sm:w-72 flex-col gap-2">
+            <div
+              className={`pb-1.5 flex items-center justify-between text-[9px] uppercase tracking-[0.25em] border-b ${
+                isLight ? "border-sky-300 text-sky-700 font-black" : "border-cyan-400/30 text-cyan-300 font-bold"
+              }`}
+            >
               <span>SUBSYSTEM STATUS</span>
-              <span>AUTO CHECK</span>
+              <span>AUTO CHECK ({goCount}/7)</span>
             </div>
 
             {snap.systems.map((sys) => {
@@ -120,22 +203,56 @@ export function IsroLaunchHud() {
               return (
                 <div
                   key={sys.id}
-                  className={`p-2 rounded border transition-all duration-200 backdrop-blur-sm ${
+                  className={`p-2 rounded border transition-all duration-200 backdrop-blur-md ${
                     isGo
-                      ? "border-emerald-500/40 bg-emerald-950/30 text-emerald-200"
+                      ? isLight
+                        ? "border-emerald-500 bg-white/95 text-emerald-700 shadow-sm"
+                        : "border-emerald-500/50 bg-emerald-950/40 text-emerald-300 shadow-[0_0_10px_rgba(16,185,129,0.15)]"
                       : isChecking
-                      ? "border-amber-400/50 bg-amber-950/30 text-amber-100 animate-pulse"
-                      : "border-white/5 bg-slate-950/20 text-slate-500"
+                      ? isLight
+                        ? "border-amber-500 bg-amber-50/95 text-amber-700 shadow-sm animate-pulse"
+                        : "border-amber-400/60 bg-amber-950/40 text-amber-300 animate-pulse"
+                      : isLight
+                      ? "border-sky-300 bg-white/90 text-sky-700"
+                      : "border-cyan-500/20 bg-slate-950/40 text-cyan-200"
                   }`}
                 >
-                  <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-semibold tracking-[0.18em]">
+                  <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold tracking-[0.18em]">
                     <div className="flex items-center gap-1.5">
-                      <span className={isGo ? "text-emerald-400" : "text-slate-600"}>
-                        {isGo ? "✓" : "○"}
+                      <span
+                        className={
+                          isGo
+                            ? isLight
+                              ? "text-emerald-700 font-extrabold"
+                              : "text-emerald-400"
+                            : isChecking
+                            ? isLight
+                              ? "text-amber-600 font-bold"
+                              : "text-amber-300"
+                            : isLight
+                            ? "text-sky-600"
+                            : "text-cyan-300"
+                        }
+                      >
+                        {isGo ? "✓" : isChecking ? "▶" : "○"}
                       </span>
                       <span>{sys.name}</span>
                     </div>
-                    <span className="text-[8.5px] tracking-widest font-mono">
+                    <span
+                      className={`text-[8.5px] tracking-widest font-mono font-black ${
+                        isGo
+                          ? isLight
+                            ? "text-emerald-700"
+                            : "text-emerald-300"
+                          : isChecking
+                          ? isLight
+                            ? "text-amber-700"
+                            : "text-amber-300"
+                          : isLight
+                          ? "text-sky-700"
+                          : "text-cyan-300"
+                      }`}
+                    >
                       {isGo ? "GO" : isChecking ? "CHECKING..." : "WAIT"}
                     </span>
                   </div>
@@ -144,23 +261,43 @@ export function IsroLaunchHud() {
             })}
 
             {snap.allSystemsGo && (
-              <div className="mt-1 p-2 rounded border border-emerald-400/60 bg-emerald-950/60 text-emerald-300 text-center text-xs tracking-[0.25em] font-bold animate-pulse">
+              <div
+                className={`mt-1 p-2.5 rounded border-2 text-center text-xs tracking-[0.25em] font-black animate-pulse ${
+                  isLight
+                    ? "border-emerald-500 bg-emerald-100 text-emerald-800 shadow-md"
+                    : "border-emerald-400 bg-emerald-950/80 text-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.4)]"
+                }`}
+              >
                 &gt;&gt;&gt; ALL SYSTEMS GO &lt;&lt;&lt;
               </div>
             )}
           </div>
 
-          {/* Right Flight Dynamics Telemetry */}
-          <div className="absolute right-4 sm:right-8 top-24 sm:top-28 w-56 sm:w-64 flex flex-col gap-2.5">
-            <div className="border-b border-cyan-400/20 pb-1.5 flex items-center justify-between text-[9px] uppercase tracking-[0.25em] text-cyan-300/70">
+          {/* ========================================================
+              DESKTOP RIGHT FLIGHT DYNAMICS TELEMETRY (>= 768px)
+              ======================================================== */}
+          <div className="hidden md:flex absolute right-4 sm:right-8 top-24 sm:top-28 w-56 sm:w-64 flex-col gap-2.5">
+            <div
+              className={`pb-1.5 flex items-center justify-between text-[9px] uppercase tracking-[0.25em] border-b ${
+                isLight ? "border-sky-300 text-sky-700 font-black" : "border-cyan-400/30 text-cyan-300 font-bold"
+              }`}
+            >
               <span>FLIGHT TELEMETRY</span>
               <span>STAGE-1 S200</span>
             </div>
 
             {/* Altitude Gauge */}
-            <div className="p-2.5 rounded border border-white/10 bg-slate-950/40 backdrop-blur-sm flex flex-col">
-              <span className="text-[8.5px] text-slate-400 tracking-[0.2em] uppercase">ALTITUDE</span>
-              <span className="text-xl sm:text-2xl font-bold text-slate-100 tracking-tight">
+            <div
+              className={`p-2.5 rounded border backdrop-blur-md flex flex-col ${
+                isLight
+                  ? "border-sky-300 bg-white/95 shadow-sm"
+                  : "border-cyan-500/30 bg-slate-950/60"
+              }`}
+            >
+              <span className={`text-[8.5px] tracking-[0.2em] uppercase font-bold ${isLight ? "text-amber-600" : "text-amber-300"}`}>
+                ALTITUDE
+              </span>
+              <span className={`text-xl sm:text-2xl font-black tracking-tight ${isLight ? "text-sky-700" : "text-cyan-200"}`}>
                 {snap.rocketAltitudeMeters > 0
                   ? `${(snap.rocketAltitudeMeters / 1000).toFixed(2)} KM`
                   : "0.00 M (PAD)"}
@@ -168,9 +305,17 @@ export function IsroLaunchHud() {
             </div>
 
             {/* Velocity Gauge */}
-            <div className="p-2.5 rounded border border-white/10 bg-slate-950/40 backdrop-blur-sm flex flex-col">
-              <span className="text-[8.5px] text-slate-400 tracking-[0.2em] uppercase">VELOCITY</span>
-              <span className="text-xl sm:text-2xl font-bold text-cyan-300 tracking-tight">
+            <div
+              className={`p-2.5 rounded border backdrop-blur-md flex flex-col ${
+                isLight
+                  ? "border-sky-300 bg-white/95 shadow-sm"
+                  : "border-cyan-500/30 bg-slate-950/60"
+              }`}
+            >
+              <span className={`text-[8.5px] tracking-[0.2em] uppercase font-bold ${isLight ? "text-amber-600" : "text-amber-300"}`}>
+                VELOCITY
+              </span>
+              <span className={`text-xl sm:text-2xl font-black tracking-tight ${isLight ? "text-sky-700" : "text-cyan-300"}`}>
                 {snap.rocketVelocity > 0
                   ? `${Math.floor(snap.rocketVelocity)} M/S`
                   : "0 M/S"}
@@ -178,12 +323,18 @@ export function IsroLaunchHud() {
             </div>
 
             {/* Thrust Gauge */}
-            <div className="p-2.5 rounded border border-white/10 bg-slate-950/40 backdrop-blur-sm flex flex-col gap-1.5">
-              <div className="flex justify-between text-[8.5px] text-slate-400 tracking-wider">
+            <div
+              className={`p-2.5 rounded border backdrop-blur-md flex flex-col gap-1.5 ${
+                isLight
+                  ? "border-sky-300 bg-white/95 shadow-sm"
+                  : "border-cyan-500/30 bg-slate-950/60"
+              }`}
+            >
+              <div className={`flex justify-between text-[8.5px] tracking-wider font-bold ${isLight ? "text-amber-600" : "text-amber-300"}`}>
                 <span>S200 + L110 THRUST</span>
                 <span>{Math.round(snap.engineThrust * 100)}%</span>
               </div>
-              <div className="h-2 w-full rounded-full bg-slate-800 overflow-hidden">
+              <div className={`h-2 w-full rounded-full overflow-hidden ${isLight ? "bg-slate-200" : "bg-slate-800"}`}>
                 <div
                   className="h-full bg-gradient-to-r from-amber-500 via-orange-500 to-emerald-400 transition-all duration-150"
                   style={{ width: `${snap.engineThrust * 100}%` }}
@@ -192,50 +343,138 @@ export function IsroLaunchHud() {
             </div>
 
             {/* National Flag Verification */}
-            <div className="p-2 rounded border border-amber-500/20 bg-slate-950/30 flex items-center justify-between text-[8px] text-slate-300">
-              <span>LIVERY:</span>
-              <span className="text-amber-300 font-semibold tracking-widest">🇮🇳 TRICOLOR MOUNTED</span>
+            <div
+              className={`p-2 rounded border flex items-center justify-between text-[8px] ${
+                isLight
+                  ? "border-amber-400 bg-white/95 text-amber-800 shadow-sm"
+                  : "border-amber-500/30 bg-slate-950/50 text-amber-200"
+              }`}
+            >
+              <span className={`font-bold ${isLight ? "text-amber-700" : "text-amber-300"}`}>LIVERY:</span>
+              <span className="font-black tracking-widest text-amber-500">
+                🇮🇳 TRICOLOR MOUNTED
+              </span>
+            </div>
+          </div>
+
+          {/* ========================================================
+              MOBILE BOTTOM FLIGHT TELEMETRY HUD BAR (< 768px)
+              Neat 3-column horizontal HUD above bottom controls
+              ======================================================== */}
+          <div className="md:hidden absolute bottom-16 inset-x-3 z-40 pointer-events-none">
+            <div
+              className={`grid grid-cols-3 divide-x rounded-xl border p-2 backdrop-blur-md text-center shadow-lg ${
+                isLight
+                  ? "border-sky-300 bg-white/95 divide-slate-200 text-slate-800"
+                  : "border-cyan-500/30 bg-slate-950/85 divide-slate-800 text-cyan-200"
+              }`}
+            >
+              <div className="px-1 flex flex-col">
+                <span className={`text-[7.5px] uppercase tracking-wider font-bold ${isLight ? "text-amber-700" : "text-amber-300"}`}>
+                  ALTITUDE
+                </span>
+                <span className={`text-xs font-black tracking-tight ${isLight ? "text-sky-700" : "text-cyan-200"}`}>
+                  {snap.rocketAltitudeMeters > 0
+                    ? `${(snap.rocketAltitudeMeters / 1000).toFixed(1)} KM`
+                    : "0.0 M"}
+                </span>
+              </div>
+              <div className="px-1 flex flex-col">
+                <span className={`text-[7.5px] uppercase tracking-wider font-bold ${isLight ? "text-amber-700" : "text-amber-300"}`}>
+                  VELOCITY
+                </span>
+                <span className={`text-xs font-black tracking-tight ${isLight ? "text-sky-700" : "text-cyan-300"}`}>
+                  {snap.rocketVelocity > 0 ? `${Math.floor(snap.rocketVelocity)} M/S` : "0 M/S"}
+                </span>
+              </div>
+              <div className="px-1 flex flex-col">
+                <span className={`text-[7.5px] uppercase tracking-wider font-bold ${isLight ? "text-amber-700" : "text-amber-300"}`}>
+                  THRUST
+                </span>
+                <div className="flex items-center justify-center gap-1 mt-0.5">
+                  <span className="text-xs font-black text-emerald-500">
+                    {Math.round(snap.engineThrust * 100)}%
+                  </span>
+                  <div className={`h-1.5 w-7 rounded-full overflow-hidden ${isLight ? "bg-slate-200" : "bg-slate-800"}`}>
+                    <div
+                      className="h-full bg-emerald-400 transition-all duration-150"
+                      style={{ width: `${snap.engineThrust * 100}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
           {/* ========================================================
               3. UNMISSABLE CENTRAL COUNTDOWN DISPLAY
-              "count down isnt showing up" -> Large, bold, glowing, centered
               ======================================================== */}
           {snap.countdown >= 0 && snap.phase !== "TRANSITION" && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-50">
-              <div className="flex flex-col items-center justify-center px-10 py-7 rounded-3xl border-2 border-amber-400/60 bg-slate-950/90 backdrop-blur-2xl shadow-[0_0_90px_rgba(251,191,36,0.5)] transform scale-105 transition-transform duration-200">
-                <span className="font-mono text-xs sm:text-sm uppercase tracking-[0.42em] text-cyan-300 font-bold mb-2">
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-50 px-4">
+              <div
+                className={`flex flex-col items-center justify-center px-6 py-5 sm:px-10 sm:py-7 rounded-2xl sm:rounded-3xl border-2 transform scale-100 sm:scale-105 transition-transform duration-200 ${
+                  isLight
+                    ? "border-amber-500/80 bg-white/95 backdrop-blur-2xl shadow-[0_0_60px_rgba(245,158,11,0.25)]"
+                    : "border-amber-400/60 bg-slate-950/90 backdrop-blur-2xl shadow-[0_0_90px_rgba(251,191,36,0.5)]"
+                }`}
+              >
+                <span
+                  className={`font-mono text-[10px] sm:text-sm uppercase tracking-[0.3em] sm:tracking-[0.42em] font-bold mb-1 sm:mb-2 ${
+                    isLight ? "text-amber-800" : "text-cyan-300"
+                  }`}
+                >
                   TERMINAL COUNTDOWN
                 </span>
-                <span className="font-mono text-8xl sm:text-9xl md:text-[11rem] font-black tracking-tight text-amber-400 drop-shadow-[0_0_60px_rgba(251,191,36,0.9)] leading-none select-none animate-pulse">
+                <span
+                  className={`font-mono text-7xl sm:text-9xl md:text-[11rem] font-black tracking-tight leading-none select-none animate-pulse ${
+                    isLight
+                      ? "text-amber-600 drop-shadow-[0_4px_30px_rgba(217,119,6,0.35)]"
+                      : "text-amber-400 drop-shadow-[0_0_60px_rgba(251,191,36,0.9)]"
+                  }`}
+                >
                   {snap.countdownLabel || `T - ${snap.countdown}`}
                 </span>
-                <span className="mt-4 font-mono text-xs sm:text-sm text-cyan-200 tracking-[0.35em] uppercase font-semibold">
+                <span
+                  className={`mt-2 sm:mt-4 font-mono text-[10px] sm:text-sm tracking-[0.25em] sm:tracking-[0.35em] uppercase font-bold text-center ${
+                    isLight ? "text-slate-700" : "text-cyan-200"
+                  }`}
+                >
                   {snap.statusSubline}
                 </span>
               </div>
             </div>
           )}
 
-          {/* Center Initial Header before countdown */}
+          {/* Center Initial Header before countdown: Main Systems Diagnostics */}
           {(snap.phase === "INIT" || snap.phase === "SYSTEMS_CHECK") && snap.countdown < 0 && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-4">
-              <div className="relative flex flex-col items-center justify-center p-8 sm:p-12 text-center">
-                <span className="hud-bracket hud-bracket-tl !w-6 !h-6 !border-cyan-400/60" />
-                <span className="hud-bracket hud-bracket-tr !w-6 !h-6 !border-cyan-400/60" />
-                <span className="hud-bracket hud-bracket-bl !w-6 !h-6 !border-cyan-400/60" />
-                <span className="hud-bracket hud-bracket-br !w-6 !h-6 !border-cyan-400/60" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-4 z-50">
+              <div
+                className={`relative flex flex-col items-center justify-center p-5 sm:p-12 text-center rounded-2xl sm:rounded-3xl border-2 backdrop-blur-2xl transition-all duration-300 max-w-[92vw] sm:max-w-2xl ${
+                  isLight
+                    ? "border-sky-400/80 bg-white/95 shadow-[0_0_60px_rgba(14,165,233,0.35)]"
+                    : "border-cyan-400/60 bg-slate-950/90 shadow-[0_0_70px_rgba(56,189,248,0.4)]"
+                }`}
+              >
+                <span className={`hud-bracket hud-bracket-tl !w-5 !h-5 sm:!w-7 sm:!h-7 border-2 ${isLight ? "!border-sky-500" : "!border-cyan-400"}`} />
+                <span className={`hud-bracket hud-bracket-tr !w-5 !h-5 sm:!w-7 sm:!h-7 border-2 ${isLight ? "!border-sky-500" : "!border-cyan-400"}`} />
+                <span className={`hud-bracket hud-bracket-bl !w-5 !h-5 sm:!w-7 sm:!h-7 border-2 ${isLight ? "!border-sky-500" : "!border-cyan-400"}`} />
+                <span className={`hud-bracket hud-bracket-br !w-5 !h-5 sm:!w-7 sm:!h-7 border-2 ${isLight ? "!border-sky-500" : "!border-cyan-400"}`} />
 
-                <span className="text-xs uppercase tracking-[0.45em] text-cyan-300">
-                  SRIHARIKOTA LAUNCH COMPLEX 2
+                <span className={`text-[9.5px] sm:text-sm uppercase tracking-[0.3em] sm:tracking-[0.45em] font-black ${isLight ? "text-amber-600" : "text-amber-400"}`}>
+                  SRIHARIKOTA COMPLEX 2
                 </span>
-                <h1 className="mt-2 text-4xl sm:text-6xl font-bold tracking-tight text-slate-100">
+                <h1
+                  className={`mt-2 sm:mt-3 text-2xl sm:text-5xl md:text-7xl font-black tracking-tight drop-shadow-md select-none ${
+                    isLight
+                      ? "text-transparent bg-clip-text bg-gradient-to-r from-sky-600 via-cyan-600 to-amber-600"
+                      : "text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-200 to-amber-300 drop-shadow-[0_0_40px_rgba(56,189,248,0.8)]"
+                  }`}
+                >
                   {snap.statusHeadline}
                 </h1>
-                <div className="mt-3 flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-ping" />
-                  <span className="text-xs sm:text-sm uppercase tracking-[0.3em] text-cyan-200/90 font-medium">
+                <div className="mt-2.5 sm:mt-4 flex items-center justify-center gap-2">
+                  <span className={`h-2 w-2 rounded-full animate-ping shrink-0 ${isLight ? "bg-emerald-500" : "bg-emerald-400"}`} />
+                  <span className={`text-[10px] sm:text-sm uppercase tracking-[0.2em] sm:tracking-[0.32em] font-bold ${isLight ? "text-emerald-700" : "text-emerald-300"}`}>
                     // {snap.statusSubline}
                   </span>
                 </div>
@@ -243,45 +482,77 @@ export function IsroLaunchHud() {
             </div>
           )}
 
-          {/* Liftoff Announcement */}
+          {/* Liftoff / Stage-1 Separation Announcement */}
           {snap.phase === "LIFTOFF" && snap.countdown < 0 && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-4">
-              <span className="text-5xl sm:text-7xl font-extrabold tracking-[-0.03em] text-emerald-300 drop-shadow-[0_0_50px_rgba(52,211,153,0.7)]">
-                LIFTOFF
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-4 text-center">
+              <span
+                className={`text-4xl sm:text-7xl font-extrabold tracking-[-0.03em] ${
+                  snap.statusHeadline === "STAGE-1 SEPARATION"
+                    ? isLight
+                      ? "text-amber-600 drop-shadow-[0_4px_30px_rgba(217,119,6,0.35)]"
+                      : "text-amber-400 drop-shadow-[0_0_50px_rgba(251,191,36,0.8)]"
+                    : isLight
+                    ? "text-emerald-700 drop-shadow-[0_4px_30px_rgba(4,120,87,0.3)]"
+                    : "text-emerald-300 drop-shadow-[0_0_50px_rgba(52,211,153,0.7)]"
+                }`}
+              >
+                {snap.statusHeadline}
               </span>
-              <span className="mt-3 text-xs sm:text-sm text-cyan-200 tracking-[0.35em] uppercase font-medium">
-                SRIHARIKOTA TOWER CLEARED // ASCENT VECTOR NOMINAL
+              <span
+                className={`mt-2 sm:mt-3 text-[10px] sm:text-sm tracking-[0.25em] sm:tracking-[0.35em] uppercase font-bold ${
+                  isLight ? "text-slate-800" : "text-cyan-200 font-medium"
+                }`}
+              >
+                {snap.statusSubline}
               </span>
             </div>
           )}
 
-          {/* Bottom Footer & Skip Control */}
-          <footer className="absolute bottom-0 inset-x-0 p-4 sm:p-6 flex items-end justify-between text-[10px] text-slate-400 tracking-[0.2em] uppercase">
-            <div className="hidden sm:flex items-center gap-4 text-slate-500 text-[9px]">
+          {/* Bottom Footer, Theme Switcher & Skip Control */}
+          <footer
+            className={`absolute bottom-0 inset-x-0 p-3 sm:p-6 flex items-center justify-between text-[9px] sm:text-[10px] tracking-[0.16em] sm:tracking-[0.2em] uppercase ${
+              isLight ? "text-slate-600" : "text-slate-400"
+            }`}
+          >
+            <div className={`hidden sm:flex items-center gap-4 text-[9px] ${isLight ? "text-slate-600 font-semibold" : "text-slate-500"}`}>
               <span>GRID: SHAR-LC02</span>
               <span>FREQ: 2.24 GHz</span>
               <span>TOW-CLEAR: OK</span>
             </div>
 
-            <div className="flex items-center gap-2 mx-auto sm:mx-0">
-              <span className="h-1 w-8 bg-cyan-500/40 rounded-full" />
-              <span className="text-[9px] text-cyan-300 tracking-[0.25em]">
+            <div className="hidden sm:flex items-center gap-2 mx-auto sm:mx-0">
+              <span className={`h-1 w-8 rounded-full ${isLight ? "bg-sky-400/60" : "bg-cyan-500/40"}`} />
+              <span className={`text-[9px] tracking-[0.25em] font-bold ${isLight ? "text-sky-800" : "text-cyan-300"}`}>
                 ISRO-INSPIRED LAUNCH PROTOCOL
               </span>
-              <span className="h-1 w-8 bg-cyan-500/40 rounded-full" />
+              <span className={`h-1 w-8 rounded-full ${isLight ? "bg-sky-400/60" : "bg-cyan-500/40"}`} />
             </div>
 
-            <button
-              type="button"
-              onClick={() => void skipLaunchIntro()}
-              className="pointer-events-auto group px-3.5 py-1.5 rounded-full border border-cyan-400/30 bg-slate-950/70 backdrop-blur-md text-[9px] sm:text-[10px] text-cyan-200/90 hover:text-cyan-100 hover:border-cyan-300/80 hover:bg-cyan-950/50 transition-all duration-300 cursor-pointer shadow-[0_0_15px_rgba(56,189,248,0.15)] focus:outline-none focus:ring-1 focus:ring-cyan-300"
-              aria-label="Skip launch intro directly to hero"
-            >
-              <span className="tracking-[0.22em]">SKIP SEQUENCE</span>
-              <span className="ml-1.5 px-1 rounded bg-cyan-900/60 border border-cyan-400/30 text-[8px] text-cyan-300">
-                ESC
-              </span>
-            </button>
+            {/* Right Action Group: Theme Toggle + Skip Sequence */}
+            <div className="flex items-center gap-2 pointer-events-auto ml-auto sm:ml-0">
+              <ThemeToggle showLabel className="shadow-md" />
+              <button
+                type="button"
+                onClick={() => void skipLaunchIntro()}
+                className={`group px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-full border backdrop-blur-md text-[8.5px] sm:text-[10px] transition-all duration-300 cursor-pointer focus:outline-none ${
+                  isLight
+                    ? "border-slate-300/90 bg-white/90 text-slate-800 hover:text-slate-950 hover:border-slate-400 hover:bg-white shadow-sm focus:ring-1 focus:ring-slate-400"
+                    : "border-cyan-400/30 bg-slate-950/70 text-cyan-200/90 hover:text-cyan-100 hover:border-cyan-300/80 hover:bg-cyan-950/50 shadow-[0_0_15px_rgba(56,189,248,0.15)] focus:ring-1 focus:ring-cyan-300"
+                }`}
+                aria-label="Skip launch intro directly to hero"
+              >
+                <span className="tracking-[0.18em] sm:tracking-[0.22em]">SKIP</span>
+                <span
+                  className={`ml-1 px-1 rounded text-[7.5px] sm:text-[8px] font-bold ${
+                    isLight
+                      ? "bg-slate-100 border border-slate-300 text-slate-700"
+                      : "bg-cyan-900/60 border border-cyan-400/30 text-cyan-300"
+                  }`}
+                >
+                  ESC
+                </span>
+              </button>
+            </div>
           </footer>
         </div>
       )}

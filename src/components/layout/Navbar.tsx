@@ -5,9 +5,12 @@ import { useEffect, useState } from "react";
 import { navItems } from "@/data/navigation";
 import { profile } from "@/data/profile";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { useTheme } from "@/components/providers/ThemeProvider";
 import { cn } from "@/lib/cn";
 
 export function Navbar() {
+  const { theme } = useTheme();
+  const isLight = theme === "light";
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -30,7 +33,9 @@ export function Navbar() {
       className={cn(
         "fixed inset-x-0 top-0 z-50 border-b transition-[background,border-color,backdrop-filter] duration-500",
         scrolled || open
-          ? "border-white/10 bg-[#070b12]/75 backdrop-blur-xl"
+          ? isLight
+            ? "border-slate-200/80 bg-white/90 shadow-sm backdrop-blur-xl"
+            : "border-white/10 bg-[#070b12]/80 backdrop-blur-xl"
           : "border-transparent bg-transparent",
       )}
     >
@@ -40,10 +45,13 @@ export function Navbar() {
       >
         <a
           href="#hero"
-          className="font-mono text-xs tracking-[0.28em] text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200/70"
+          className={cn(
+            "font-mono text-xs tracking-[0.28em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200/70",
+            isLight ? "text-slate-900 font-bold" : "text-slate-100"
+          )}
         >
           {profile.shortName}
-          <span className="ml-2 hidden text-slate-500 sm:inline">/ PORTFOLIO</span>
+          <span className={cn("ml-2 hidden sm:inline", isLight ? "text-slate-500" : "text-slate-500")}>/ PORTFOLIO</span>
         </a>
 
         <ul className="hidden items-center gap-7 md:flex">
@@ -75,7 +83,12 @@ export function Navbar() {
           <ThemeToggle />
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-white/10 text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200/70 cursor-pointer"
+            className={cn(
+              "inline-flex h-10 w-10 items-center justify-center rounded-md border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200/70 cursor-pointer transition-colors",
+              isLight
+                ? "border-slate-300 bg-white text-slate-800 shadow-sm hover:bg-slate-50"
+                : "border-white/10 text-slate-100 hover:bg-white/5"
+            )}
             aria-expanded={open}
             aria-controls="mobile-nav"
             onClick={() => setOpen((value) => !value)}
@@ -89,14 +102,22 @@ export function Navbar() {
       {open ? (
         <div
           id="mobile-nav"
-          className="border-t border-white/10 bg-[#070b12]/95 px-5 py-6 md:hidden backdrop-blur-xl"
+          className={cn(
+            "border-t px-5 py-6 md:hidden backdrop-blur-xl transition-all duration-300",
+            isLight
+              ? "border-slate-200 bg-white/98 text-slate-900 shadow-xl"
+              : "border-white/10 bg-[#070b12]/95 text-slate-100"
+          )}
         >
           <ul className="flex flex-col gap-4">
             {navItems.map((item) => (
               <li key={item.id}>
                 <a
                   href={item.href}
-                  className="block py-1 font-mono text-sm uppercase tracking-[0.22em] text-slate-100"
+                  className={cn(
+                    "block py-1 font-mono text-sm uppercase tracking-[0.22em] transition-colors",
+                    isLight ? "text-slate-800 hover:text-sky-600 font-semibold" : "text-slate-100 hover:text-cyan-200"
+                  )}
                   onClick={() => setOpen(false)}
                 >
                   {item.label}
@@ -106,15 +127,18 @@ export function Navbar() {
             <li>
               <a
                 href={profile.github}
-                className="block py-1 font-mono text-sm uppercase tracking-[0.22em] text-cyan-100"
+                className={cn(
+                  "block py-1 font-mono text-sm uppercase tracking-[0.22em] transition-colors",
+                  isLight ? "text-sky-700 hover:text-sky-900 font-bold" : "text-cyan-100 hover:text-cyan-300"
+                )}
                 rel="noreferrer"
                 target="_blank"
               >
                 GitHub
               </a>
             </li>
-            <li className="pt-3 border-t border-white/10 flex items-center justify-between">
-              <span className="font-mono text-xs uppercase tracking-[0.2em] text-slate-400">
+            <li className={cn("pt-3 border-t flex items-center justify-between", isLight ? "border-slate-200" : "border-white/10")}>
+              <span className={cn("font-mono text-xs uppercase tracking-[0.2em]", isLight ? "text-slate-600 font-bold" : "text-slate-400")}>
                 DISPLAY THEME
               </span>
               <ThemeToggle showLabel />

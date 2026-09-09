@@ -32,6 +32,7 @@ export interface LaunchIntroData {
   rocketAltitudeMeters: number; // for HUD readout
   cameraShake: number; // 0..1
   thrusterZoom: number; // 0..1 smooth camera zoom from station into inside thrusters
+  stageSeparation: number; // 0..1 S200 booster strap-on separation
   orangeWall: number; // 0..1 full-screen radiant orange screen wall
   zipProgress: number; // 0..1 tears from bottom middle and separates like zip to reveal hero
   baseVisible: boolean; // whether the launchpad base & tower in background are visible
@@ -73,6 +74,7 @@ export const launchIntroState: LaunchIntroData = {
   rocketAltitudeMeters: 0,
   cameraShake: 0,
   thrusterZoom: 0,
+  stageSeparation: 0,
   orangeWall: 0,
   zipProgress: 0,
   baseVisible: true,
@@ -312,13 +314,13 @@ export async function startLaunchSequence(): Promise<void> {
     ease: "power2.in",
   });
 
-  // Phase 5: MAJESTIC ISRO ROCKET LIFTOFF (6.8s) - Deliberate, realistic ascent
-  // "Launching of the isro spaceship is happening too fast, slow it down"
+  // Phase 5: MAJESTIC ISRO ROCKET LIFTOFF & STAGE SEPARATION (7.6s)
+  // 1. Ascent & Pad clearance -> 2. Stage-1 S200 Booster Separation -> 3. Camera dive into core thrusters
   tl.to(launchIntroState, {
-    duration: 6.8,
-    rocketY: 38,
-    rocketVelocity: 2150,
-    rocketAltitudeMeters: 36000,
+    duration: 7.6,
+    rocketY: 42,
+    rocketVelocity: 2350,
+    rocketAltitudeMeters: 42000,
     cameraShake: 0.9,
     totalProgress: 0.78,
     onStart: () => {
@@ -326,42 +328,59 @@ export async function startLaunchSequence(): Promise<void> {
       launchIntroState.countdown = -1;
       launchIntroState.statusHeadline = "LIFTOFF";
       launchIntroState.statusSubline = "SRIHARIKOTA TOWER CLEARED // ASCENT NOMINAL";
+      launchIntroState.stageSeparation = 0;
       notifyLaunchIntro();
     },
     onUpdate: function () {
       const p = this.progress();
 
       // 1. Tower Clearance & Base structure visibility
-      if (p >= 0.45 && launchIntroState.baseVisible) {
+      if (p >= 0.40 && launchIntroState.baseVisible) {
         launchIntroState.baseVisible = false;
       }
 
-      // 2. Camera begins smooth dive into thruster nozzles
+      // 2. Stage Separation: S200 Solid Rocket Boosters detach and separate outward (p: 0.40 -> 0.65)
+      // "seperate the stages before zooming into the rocket"
       if (p < 0.40) {
+        launchIntroState.stageSeparation = 0;
+      } else if (p <= 0.65) {
+        const sepProgress = (p - 0.40) / 0.25;
+        // Smoothstep interpolation for stage separation
+        launchIntroState.stageSeparation = sepProgress * sepProgress * (3 - 2 * sepProgress);
+        if (sepProgress > 0.08) {
+          launchIntroState.statusHeadline = "STAGE-1 SEPARATION";
+          launchIntroState.statusSubline = "S200 STRAP-ON JETTISON // L110 CORE VIKAS NOMINAL";
+        }
+      } else {
+        launchIntroState.stageSeparation = 1;
+      }
+
+      // 3. Camera dives into core engine bells AFTER stage separation (p: 0.65 -> 0.94)
+      if (p < 0.65) {
         launchIntroState.thrusterZoom = 0;
-      } else if (p <= 0.92) {
-        const zProg = (p - 0.40) / 0.52;
+      } else if (p <= 0.94) {
+        const zProg = (p - 0.65) / 0.29;
         launchIntroState.thrusterZoom = zProg * zProg * (3 - 2 * zProg);
       } else {
         launchIntroState.thrusterZoom = 1;
       }
 
-      // 3. Preload website DOM safely behind the black wall at p >= 0.55
-      if (p >= 0.55 && !launchIntroState.heroPreloaded) {
+      // 4. Preload website DOM safely behind the concealment wall at p >= 0.68
+      if (p >= 0.68 && !launchIntroState.heroPreloaded) {
         launchIntroState.heroPreloaded = true;
         launchIntroState.cosmosLoaded = 1;
       }
 
-      // 4. Orange screen wall ramps up to 100% full-screen coverage
-      if (p < 0.68) {
+      // 5. Orange screen wall ramps up to 100% full-screen coverage as camera enters thrusters
+      if (p < 0.74) {
         launchIntroState.orangeWall = 0;
       } else {
-        const wallP = Math.min(1, (p - 0.68) / 0.28);
+        const wallP = Math.min(1, (p - 0.74) / 0.20);
         launchIntroState.orangeWall = wallP * wallP;
       }
       launchIntroState.fogCover = launchIntroState.orangeWall;
 
-      // 5. Fade telemetry HUD completely as orange wall fills the screen
+      // 6. Fade telemetry HUD completely as orange wall fills the screen
       if (launchIntroState.orangeWall >= 0.65 && launchIntroState.hudVisible) {
         launchIntroState.hudVisible = false;
       }
@@ -437,6 +456,7 @@ export function completeLaunchSequence(): void {
   launchIntroState.heroReveal = 1;
   launchIntroState.exhaustExpansion = 1;
   launchIntroState.stardustMorph = 1;
+  launchIntroState.stageSeparation = 1;
   launchIntroState.cameraShake = 0;
   launchIntroState.engineThrust = 0;
 

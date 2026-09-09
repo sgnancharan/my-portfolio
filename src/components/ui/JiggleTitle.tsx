@@ -3,6 +3,7 @@
 import { motion, useAnimationControls } from "framer-motion";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
+import { useTheme } from "@/components/providers/ThemeProvider";
 
 // Sci-Fi Cybernetic Rune Glyphs for the Quantum Decrypt Scramble
 const SCRAMBLE_GLYPHS = ["§", "⎔", "⏣", "⎈", "⏢", "Δ", "Σ", "∇", "0", "1", "X", "Z", "✦", "◈"];
@@ -19,7 +20,8 @@ interface Particle {
   maxLife: number;
 }
 
-const SPARKLE_COLORS = ["#38bdf8", "#818cf8", "#a78bfa", "#34d399", "#f8fafc"];
+const SPARKLE_COLORS_DARK = ["#38bdf8", "#818cf8", "#a78bfa", "#34d399", "#f8fafc"];
+const SPARKLE_COLORS_LIGHT = ["#0284c7", "#6366f1", "#059669", "#d97706", "#0f172a"];
 
 interface SqueezeCharacterProps {
   char: string;
@@ -40,6 +42,12 @@ function SqueezeCharacter({
   const [displayChar, setDisplayChar] = useState(char);
   const lastTriggerTime = useRef(0);
   const reduced = usePrefersReducedMotion();
+  const { theme } = useTheme();
+  const isLight = theme === "light";
+
+  const baseColor = isLight ? "#090d16" : "#f8fafc";
+  const hoverColor = isLight ? "#0284c7" : "#38bdf8";
+  const midColor = isLight ? "#6366f1" : "#a78bfa";
 
   // Quantum Scramble effect
   useEffect(() => {
@@ -81,18 +89,25 @@ function SqueezeCharacter({
         scaleX: [1, 0.58, 1.48, 0.82, 1.14, 1],
         scaleY: [1, 1.54, 0.60, 1.22, 0.90, 1],
         color: [
-          "#f8fafc",
-          "#38bdf8",
-          "#a78bfa",
-          "#38bdf8",
-          "#f8fafc",
+          baseColor,
+          hoverColor,
+          midColor,
+          hoverColor,
+          baseColor,
         ],
-        textShadow: [
-          "0 0 0px rgba(56, 189, 248, 0)",
-          "0 0 32px rgba(56, 189, 248, 0.98), 0 0 64px rgba(167, 139, 250, 0.7)",
-          "0 0 18px rgba(56, 189, 248, 0.75)",
-          "0 0 0px rgba(56, 189, 248, 0)",
-        ],
+        textShadow: isLight
+          ? [
+              "0 0 0px rgba(2, 132, 199, 0)",
+              "0 0 16px rgba(2, 132, 199, 0.3), 0 0 32px rgba(99, 102, 241, 0.2)",
+              "0 0 8px rgba(2, 132, 199, 0.2)",
+              "0 0 0px rgba(2, 132, 199, 0)",
+            ]
+          : [
+              "0 0 0px rgba(56, 189, 248, 0)",
+              "0 0 32px rgba(56, 189, 248, 0.98), 0 0 64px rgba(167, 139, 250, 0.7)",
+              "0 0 18px rgba(56, 189, 248, 0.75)",
+              "0 0 0px rgba(56, 189, 248, 0)",
+            ],
         transition: {
           duration: 0.58,
           times: [0, 0.2, 0.44, 0.66, 0.86, 1],
@@ -100,7 +115,7 @@ function SqueezeCharacter({
         },
       });
     },
-    [controls, reduced, onCharacterInteraction],
+    [controls, reduced, onCharacterInteraction, baseColor, hoverColor, midColor, isLight],
   );
 
   useEffect(() => {
@@ -117,6 +132,7 @@ function SqueezeCharacter({
       style={{
         display: "inline-block",
         transformOrigin: "center center",
+        color: baseColor,
       }}
     >
       {displayChar}
@@ -198,6 +214,10 @@ export function JiggleTitle({ text, className = "", id }: JiggleTitleProps) {
     animFrameRef.current = requestAnimationFrame(render);
   }, []);
 
+  const { theme } = useTheme();
+  const isLight = theme === "light";
+  const sparklePalette = isLight ? SPARKLE_COLORS_LIGHT : SPARKLE_COLORS_DARK;
+
   // Spawn glowing stardust sparks that float and disperse
   const spawnSparks = useCallback((clientX: number, clientY: number, count = 3, burst = false) => {
     const canvas = canvasRef.current;
@@ -215,7 +235,7 @@ export function JiggleTitle({ text, className = "", id }: JiggleTitleProps) {
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed - (burst ? 0 : 1.2), // gentle upward float
         size: 2.2 + Math.random() * 3.2,
-        color: SPARKLE_COLORS[Math.floor(Math.random() * SPARKLE_COLORS.length)],
+        color: sparklePalette[Math.floor(Math.random() * sparklePalette.length)],
         alpha: 1,
         life: 0,
         maxLife: burst ? 35 + Math.random() * 25 : 22 + Math.random() * 18,
@@ -223,7 +243,7 @@ export function JiggleTitle({ text, className = "", id }: JiggleTitleProps) {
     }
 
     startAnimationLoop();
-  }, [startAnimationLoop]);
+  }, [startAnimationLoop, sparklePalette]);
 
   // Sync canvas size on mount / resize
   useEffect(() => {

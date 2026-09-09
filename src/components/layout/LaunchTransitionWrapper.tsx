@@ -5,8 +5,10 @@ import {
   getLaunchIntroSnapshot,
   subscribeLaunchIntro,
 } from "@/lib/launch-intro-state";
+import { useTheme } from "@/components/providers/ThemeProvider";
 
 export function LaunchTransitionWrapper({ children }: { children: ReactNode }) {
+  const { theme } = useTheme();
   const [snap, setSnap] = useState(() => getLaunchIntroSnapshot());
 
   useEffect(() => {
@@ -30,10 +32,12 @@ export function LaunchTransitionWrapper({ children }: { children: ReactNode }) {
         pointerEvents: isInteractable ? "auto" : "none",
       }}
     >
-      {/* Solid Black Wall behind which website is loaded during rocket ascent */}
+      {/* Solid Concealment Wall behind which website is loaded during rocket ascent */}
       {!isComplete && (
         <div
-          className="fixed inset-0 z-20 bg-black pointer-events-none transition-opacity duration-300"
+          className={`fixed inset-0 z-20 pointer-events-none transition-opacity duration-300 ${
+            theme === "light" ? "bg-[#f4f7fb]" : "bg-black"
+          }`}
           style={{
             opacity: snap.orangeWall >= 0.98 ? 0 : 1,
             display: snap.orangeWall >= 0.98 && snap.zipProgress > 0.05 ? "none" : "block",

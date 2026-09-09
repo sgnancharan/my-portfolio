@@ -31,7 +31,7 @@ export function Hero() {
           <JiggleTitle
             id="hero-title"
             text={profile.displayName}
-            className="mt-2 font-display text-5xl sm:text-7xl md:text-8xl lg:text-[6.25rem] leading-[0.92] font-semibold tracking-[-0.03em] text-slate-50 select-none"
+            className="mt-2 font-display text-4xl sm:text-6xl md:text-8xl lg:text-[6.25rem] leading-[0.94] font-semibold tracking-[-0.03em] text-slate-50 select-none"
           />
           <p className="mt-3 sm:mt-4 max-w-xl font-mono text-xs sm:text-sm uppercase tracking-[0.24em] text-cyan-300">
             {profile.tagline}
@@ -58,11 +58,11 @@ export function Hero() {
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.32, duration: 0.8 }}
-          className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center"
+          className="mt-8 flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto px-4 sm:px-0"
         >
           <a
             href="#about"
-            className="inline-flex items-center justify-center gap-2 rounded-full border border-cyan-100/30 bg-cyan-100/10 px-6 py-3 font-mono text-xs uppercase tracking-[0.22em] text-cyan-50 transition hover:bg-cyan-100/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200/70"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full border border-cyan-100/30 bg-cyan-100/10 px-6 py-3 font-mono text-xs uppercase tracking-[0.22em] text-cyan-50 transition hover:bg-cyan-100/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200/70"
           >
             Explore System
             <ArrowDownRight size={16} aria-hidden />
@@ -71,7 +71,7 @@ export function Hero() {
             href={profile.github}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center justify-center gap-2 rounded-full border border-white/15 px-6 py-3 font-mono text-xs uppercase tracking-[0.22em] text-slate-100 transition hover:border-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200/70"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full border border-white/15 px-6 py-3 font-mono text-xs uppercase tracking-[0.22em] text-slate-100 transition hover:border-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200/70"
           >
             <GithubIcon width={16} height={16} />
             GitHub
@@ -83,11 +83,12 @@ export function Hero() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.52, duration: 0.8 }}
-          className="mt-6 flex flex-wrap items-center justify-center gap-3 font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-200/75"
+          className="mt-6 flex flex-wrap items-center justify-center gap-3 font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-200/75 px-2"
         >
-          <div className="flex items-center gap-2 rounded-full border border-cyan-400/25 bg-cyan-950/40 px-3.5 py-1.5 backdrop-blur-md">
-            <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-ping" aria-hidden />
-            <span>Glide Name: Squeeze & Stardust · Click: Supernova · 2x Click: Quantum Scramble</span>
+          <div className="flex items-center gap-2 rounded-full border border-cyan-400/25 bg-cyan-950/40 px-3.5 py-1.5 backdrop-blur-md text-center">
+            <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-ping shrink-0" aria-hidden />
+            <span className="hidden sm:inline">Glide Name: Squeeze & Stardust · Click: Supernova · 2x Click: Quantum Scramble</span>
+            <span className="sm:hidden">Tap Name for Stardust · Click: Supernova · 2x: Scramble</span>
           </div>
         </motion.div>
       </div>

@@ -30,11 +30,11 @@ const DESKTOP_POSITIONS: Record<string, NodePosition> = {
 };
 
 const MOBILE_POSITIONS: Record<string, NodePosition> = {
-  "local-ai": { x: -115, y: -110 },
-  web: { x: 0, y: -128 },
-  aiml: { x: 115, y: -110 },
-  server: { x: -130, y: +15 },
-  debugger: { x: 130, y: +15 },
+  "local-ai": { x: -96, y: -95 },
+  web: { x: 0, y: -116 },
+  aiml: { x: 96, y: -95 },
+  server: { x: -106, y: +15 },
+  debugger: { x: 106, y: +15 },
 };
 
 export function HeroProfile() {
@@ -132,7 +132,7 @@ export function HeroProfile() {
       ref={containerRef}
       className="relative mx-auto flex w-full max-w-4xl items-center justify-center select-none"
       style={{
-        height: isMobile ? "290px" : "360px",
+        height: isMobile ? "270px" : "360px",
         perspective: "1000px",
       }}
     >
@@ -145,7 +145,7 @@ export function HeroProfile() {
         {/* SVG Dynamic Laser Connection Lines (Centered at 0,0) */}
         <svg
           className="pointer-events-none absolute inset-0 h-full w-full overflow-visible"
-          viewBox={isMobile ? "-200 -150 400 300" : "-450 -190 900 380"}
+          viewBox={isMobile ? "-180 -140 360 280" : "-450 -190 900 380"}
           preserveAspectRatio="xMidYMid meet"
           aria-hidden
         >
@@ -207,8 +207,8 @@ export function HeroProfile() {
           aria-controls="identity-modal"
           className="group relative z-20 flex items-center justify-center rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 touch-manipulation"
           style={{
-            width: isMobile ? "148px" : "205px",
-            height: isMobile ? "148px" : "205px",
+            width: isMobile ? "134px" : "205px",
+            height: isMobile ? "134px" : "205px",
             transform: "translateZ(30px)",
           }}
           onPointerEnter={() => hoverIdentity("core")}

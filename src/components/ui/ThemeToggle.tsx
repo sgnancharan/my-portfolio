@@ -32,7 +32,7 @@ export function ThemeToggle({ className = "", showLabel = false }: ThemeTogglePr
     <button
       type="button"
       onClick={toggleTheme}
-      className={`group relative inline-flex items-center gap-2 rounded-full border border-white/15 bg-slate-900/60 px-2.5 py-1.5 text-xs font-mono tracking-widest text-slate-200 backdrop-blur-md transition-all duration-300 hover:border-cyan-400/50 hover:bg-cyan-950/40 hover:text-cyan-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/70 cursor-pointer shadow-[0_0_12px_rgba(0,0,0,0.2)] ${className}`}
+      className={`theme-toggle group relative inline-flex items-center gap-2 rounded-full border border-white/15 bg-slate-900/60 px-2.5 py-1.5 text-xs font-mono tracking-widest text-slate-200 backdrop-blur-md transition-all duration-300 hover:border-cyan-400/50 hover:bg-cyan-950/40 hover:text-cyan-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/70 cursor-pointer shadow-[0_0_12px_rgba(0,0,0,0.2)] ${className}`}
       aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
       title={`Current mode: ${isDark ? "Dark (Deep Space)" : "Light (Aerospace Lab)"}`}
     >

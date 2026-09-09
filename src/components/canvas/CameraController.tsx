@@ -48,12 +48,12 @@ export function CameraController() {
       const shakeX = (Math.sin(t * 55) + Math.cos(t * 85)) * 0.035 * shakeIntensity;
       const shakeY = (Math.cos(t * 60) + Math.sin(t * 95)) * 0.035 * shakeIntensity;
 
-      // 1. Station Pad Base Coordinates
+      // 1. Station Pad Base Coordinates (optimized for both desktop widescreen and mobile portrait)
       const stationCamX = (0.2 + shakeX) * mobileScale;
-      const stationCamY = -1.2 + shakeY;
-      const stationCamZ = 9.8;
-      const stationLookY = 2.0;
-      const stationFov = 46;
+      const stationCamY = (isMobile ? -1.4 : -1.2) + shakeY;
+      const stationCamZ = isMobile ? 14.2 : 9.8;
+      const stationLookY = isMobile ? 2.5 : 2.0;
+      const stationFov = isMobile ? 50 : 46;
 
       // 2. Continuous Tracking Coordinates as rocket ascends
       const trackCamX = (0.2 * (1 - zoom * 0.5) + shakeX) * mobileScale;
