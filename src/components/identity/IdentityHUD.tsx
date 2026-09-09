@@ -335,13 +335,13 @@ export function IdentityHUD() {
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" aria-hidden />
           <p className="font-mono text-[10px] tracking-[0.2em] text-slate-300 uppercase">
             {identityInteraction.hovered === "core" ? (
-              <span className="text-cyan-300">CORE ACTIVE · S GNAN CHARAN // ALL 5 VECTORS LINKED</span>
+              <span className="text-cyan-300">CORE ACTIVE · S GNAN CHARAN {"//"} ALL 5 VECTORS LINKED</span>
             ) : activeNode ? (
               <span>
-                LINKED: <strong className="text-cyan-200">{activeNode.label}</strong> · {activeNode.kicker} // LATENCY 0.12ms
+                LINKED: <strong className="text-cyan-200">{activeNode.label}</strong> · {activeNode.kicker} {"//"} LATENCY 0.12ms
               </span>
             ) : (
-              <span>SYSTEM ONLINE · 5 NEURAL VECTORS ACTIVE // CLICK ANY NODE OR PHOTO</span>
+              <span>SYSTEM ONLINE · 5 NEURAL VECTORS ACTIVE {"//"} CLICK ANY NODE OR PHOTO</span>
             )}
           </p>
         </div>

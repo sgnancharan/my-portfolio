@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CheckCircle2, Cpu, HardDrive, Play, RefreshCw, ShieldCheck, Terminal, Wifi } from "lucide-react";
+import { Cpu, HardDrive, Play, RefreshCw, ShieldCheck, Terminal } from "lucide-react";
 import type { IdentityNodeId } from "@/types";
 
 export function IdentityViz({ id, color }: { id: IdentityNodeId; color: string }) {
@@ -19,11 +19,11 @@ export function IdentityViz({ id, color }: { id: IdentityNodeId; color: string }
       </div>
 
       {id === "aiml" ? <VizAiml color={color} /> : null}
-      {id === "debugger" ? <VizDebugger color={color} /> : null}
+      {id === "debugger" ? <VizDebugger /> : null}
       {id === "web" ? <VizWeb color={color} /> : null}
       {id === "server" ? <VizServer color={color} /> : null}
-      {id === "local-ai" ? <VizLocal color={color} /> : null}
-      {id === "core" ? <VizCore color={color} /> : null}
+      {id === "local-ai" ? <VizLocal /> : null}
+      {id === "core" ? <VizCore /> : null}
     </div>
   );
 }
@@ -80,7 +80,6 @@ function VizAiml({ color }: { color: string }) {
 
         {/* Neurons */}
         {nodes.map(([x, y], idx) => {
-          const isInput = idx < 3;
           const isLatent = idx >= 3 && idx < 7;
           const isOutput = idx >= 7;
           return (
@@ -121,7 +120,7 @@ function VizAiml({ color }: { color: string }) {
   );
 }
 
-function VizDebugger({ color }: { color: string }) {
+function VizDebugger() {
   const [stage, setStage] = useState<number>(0);
 
   const traces = [
@@ -134,7 +133,7 @@ function VizDebugger({ color }: { color: string }) {
   return (
     <div className="space-y-3 font-mono text-[11px]">
       <div className="space-y-1.5 rounded-xl border border-white/10 bg-black/60 p-3">
-        {traces.map((trace, idx) => (
+        {traces.map((trace) => (
           <div
             key={trace.code}
             className="flex items-center justify-between rounded px-2 py-1 transition"
@@ -206,7 +205,7 @@ function VizWeb({ color }: { color: string }) {
           >
             <div className="flex items-center justify-between">
               <span className="font-mono text-[10px] font-bold tracking-widest text-slate-200">
-                0{idx + 1} // {tier.title}
+                0{idx + 1} {"//"} {tier.title}
               </span>
               <span className="font-mono text-[9px] text-cyan-300">{tier.metric}</span>
             </div>
@@ -282,7 +281,7 @@ function VizServer({ color }: { color: string }) {
   );
 }
 
-function VizLocal({ color }: { color: string }) {
+function VizLocal() {
   const [running, setRunning] = useState(false);
   const [output, setOutput] = useState("");
   const timerRef = useRef<number | null>(null);
@@ -317,7 +316,7 @@ function VizLocal({ color }: { color: string }) {
       <div className="flex items-center gap-2 rounded-xl border border-emerald-400/30 bg-emerald-950/30 px-3 py-2 text-emerald-300">
         <ShieldCheck size={16} className="shrink-0" />
         <span className="text-[10px] uppercase tracking-wider font-bold">
-          100% On-Premises // Zero Outbound Network Egress
+          100% On-Premises {"//"} Zero Outbound Network Egress
         </span>
       </div>
 
@@ -345,7 +344,7 @@ function VizLocal({ color }: { color: string }) {
   );
 }
 
-function VizCore({ color }: { color: string }) {
+function VizCore() {
   return (
     <div className="space-y-3 font-mono text-[11px]">
       <div className="rounded-xl border border-cyan-400/20 bg-cyan-950/20 p-3">

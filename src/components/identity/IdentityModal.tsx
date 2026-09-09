@@ -5,7 +5,14 @@ import { ArrowLeft, ArrowRight, ExternalLink, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
-import { allIdentityNodes, PROFILE_PHOTO } from "@/data/identity-nodes";
+import {
+  allIdentityNodes,
+  identityNodes,
+  profileIdentityNodes,
+  projectIdentityNodes,
+  skillIdentityNodes,
+  PROFILE_PHOTO,
+} from "@/data/identity-nodes";
 import { profile } from "@/data/profile";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import {
@@ -28,14 +35,22 @@ export function IdentityModal({ onClose = closeIdentity }: { onClose?: () => voi
   const closeBtn = useRef<HTMLButtonElement>(null);
   const restore = useRef<HTMLElement | null>(null);
 
-  const node = allIdentityNodes.find((item) => item.id === openId);
-  const currentIndex = allIdentityNodes.findIndex((item) => item.id === openId);
+  const activeNodes = profileIdentityNodes.some((item) => item.id === openId)
+    ? profileIdentityNodes
+    : skillIdentityNodes.some((item) => item.id === openId)
+      ? skillIdentityNodes
+      : projectIdentityNodes.some((item) => item.id === openId)
+        ? projectIdentityNodes
+        : allIdentityNodes;
+
+  const node = activeNodes.find((item) => item.id === openId) ?? allIdentityNodes.find((item) => item.id === openId);
+  const currentIndex = activeNodes.findIndex((item) => item.id === openId);
 
   const safeIndex = currentIndex >= 0 ? currentIndex : 0;
-  const prevNode =
-    safeIndex > 0 ? allIdentityNodes[safeIndex - 1] : allIdentityNodes[allIdentityNodes.length - 1];
-  const nextNode =
-    safeIndex < allIdentityNodes.length - 1 ? allIdentityNodes[safeIndex + 1] : allIdentityNodes[0];
+  const prevIndex = safeIndex > 0 ? safeIndex - 1 : activeNodes.length - 1;
+  const nextIndex = safeIndex < activeNodes.length - 1 ? safeIndex + 1 : 0;
+  const prevNode = activeNodes[prevIndex] ?? node;
+  const nextNode = activeNodes[nextIndex] ?? node;
 
   useEffect(() => {
     if (!openId) return;
@@ -66,11 +81,13 @@ export function IdentityModal({ onClose = closeIdentity }: { onClose?: () => voi
         return;
       }
       if (event.key === "ArrowLeft") {
+        if (!prevNode) return;
         event.preventDefault();
         openIdentity(prevNode.id, window.innerWidth / 2, window.innerHeight / 2);
         return;
       }
       if (event.key === "ArrowRight") {
+        if (!nextNode) return;
         event.preventDefault();
         openIdentity(nextNode.id, window.innerWidth / 2, window.innerHeight / 2);
         return;
@@ -145,20 +162,20 @@ export function IdentityModal({ onClose = closeIdentity }: { onClose?: () => voi
               reduced
                 ? { opacity: 0 }
                 : {
-                    opacity: 0,
-                    scale: 0.92,
-                    y: 18,
-                  }
+                  opacity: 0,
+                  scale: 0.92,
+                  y: 18,
+                }
             }
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={
               reduced
                 ? { opacity: 0 }
                 : {
-                    opacity: 0,
-                    scale: 0.95,
-                    y: 12,
-                  }
+                  opacity: 0,
+                  scale: 0.95,
+                  y: 12,
+                }
             }
             transition={{ duration: reduced ? 0.01 : 0.32, ease: [0.16, 1, 0.3, 1] }}
           >
@@ -172,7 +189,9 @@ export function IdentityModal({ onClose = closeIdentity }: { onClose?: () => voi
                 />
                 <div>
                   <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-cyan-200/70">
-                    {node.kicker} // NODE 0{safeIndex + 1}
+                    {node.id === "core"
+                      ? `${node.kicker} // NODE 00`
+                      : `${node.kicker} // NODE 0${safeIndex + 1}`}
                   </p>
                   <h2
                     id="identity-modal-title"
@@ -234,23 +253,21 @@ export function IdentityModal({ onClose = closeIdentity }: { onClose?: () => voi
                         Linked Computational Subsystems
                       </p>
                       <div className="mt-2.5 flex flex-wrap gap-2">
-                        {allIdentityNodes
-                          .filter((n) => n.id !== "core")
-                          .map((subNode) => (
-                            <button
-                              key={subNode.id}
-                              type="button"
-                              onClick={() => openIdentity(subNode.id, ox, oy)}
-                              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 font-mono text-xs text-slate-200 hover:border-cyan-300 hover:bg-cyan-950/40 transition cursor-pointer"
-                            >
-                              <span
-                                className="h-2 w-2 rounded-full"
-                                style={{ backgroundColor: subNode.color }}
-                                aria-hidden
-                              />
-                              {subNode.label}
-                            </button>
-                          ))}
+                        {identityNodes.map((subNode) => (
+                          <button
+                            key={subNode.id}
+                            type="button"
+                            onClick={() => openIdentity(subNode.id, ox, oy)}
+                            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 font-mono text-xs text-slate-200 hover:border-cyan-300 hover:bg-cyan-950/40 transition cursor-pointer"
+                          >
+                            <span
+                              className="h-2 w-2 rounded-full"
+                              style={{ backgroundColor: subNode.color }}
+                              aria-hidden
+                            />
+                            {subNode.label}
+                          </button>
+                        ))}
                       </div>
                     </div>
 
@@ -335,27 +352,29 @@ export function IdentityModal({ onClose = closeIdentity }: { onClose?: () => voi
             )}
 
             {/* Footer Navigation Switcher */}
-            <div className="flex items-center justify-between border-t border-white/10 px-5 py-3.5 sm:px-8 bg-slate-950/90 sticky bottom-0 z-10">
-              <button
-                type="button"
-                onClick={() => openIdentity(prevNode.id, ox, oy)}
-                className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 font-mono text-xs text-slate-300 hover:text-cyan-300 hover:bg-white/5 transition cursor-pointer"
-              >
-                <ArrowLeft size={14} aria-hidden />
-                <span>{prevNode.label}</span>
-              </button>
-              <span className="hidden sm:inline font-mono text-[10px] text-slate-500 uppercase tracking-widest">
-                [ ← / → ARROW KEYS ]
-              </span>
-              <button
-                type="button"
-                onClick={() => openIdentity(nextNode.id, ox, oy)}
-                className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 font-mono text-xs text-slate-300 hover:text-cyan-300 hover:bg-white/5 transition cursor-pointer"
-              >
-                <span>{nextNode.label}</span>
-                <ArrowRight size={14} aria-hidden />
-              </button>
-            </div>
+            {prevNode && nextNode && (
+              <div className="flex items-center justify-between border-t border-white/10 px-5 py-3.5 sm:px-8 bg-slate-950/90 sticky bottom-0 z-10">
+                <button
+                  type="button"
+                  onClick={() => openIdentity(prevNode.id, ox, oy)}
+                  className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 font-mono text-xs text-slate-300 hover:text-cyan-300 hover:bg-white/5 transition cursor-pointer"
+                >
+                  <ArrowLeft size={14} aria-hidden />
+                  <span>{prevNode.label}</span>
+                </button>
+                <span className="hidden sm:inline font-mono text-[10px] text-slate-500 uppercase tracking-widest">
+                  [ ← / → ARROW KEYS ]
+                </span>
+                <button
+                  type="button"
+                  onClick={() => openIdentity(nextNode.id, ox, oy)}
+                  className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 font-mono text-xs text-slate-300 hover:text-cyan-300 hover:bg-white/5 transition cursor-pointer"
+                >
+                  <span>{nextNode.label}</span>
+                  <ArrowRight size={14} aria-hidden />
+                </button>
+              </div>
+            )}
           </motion.div>
         </motion.div>
       ) : null}

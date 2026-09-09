@@ -75,7 +75,7 @@ export function HeroProfile() {
 
     window.addEventListener("mousemove", onPointerMove, { passive: true });
 
-    let startTime = performance.now();
+    const startTime = performance.now();
 
     let targetScroll = 0;
     let currentScroll = 0;

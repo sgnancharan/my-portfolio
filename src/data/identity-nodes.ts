@@ -228,9 +228,13 @@ export const projectIdentityNodes: readonly IdentityNode[] = [
   },
 ];
 
-export const allIdentityNodes: readonly IdentityNode[] = [
+export const profileIdentityNodes: readonly IdentityNode[] = [
   ...identityNodes,
   coreIdentityNode,
+];
+
+export const allIdentityNodes: readonly IdentityNode[] = [
+  ...profileIdentityNodes,
   ...skillIdentityNodes,
   ...projectIdentityNodes,
 ];

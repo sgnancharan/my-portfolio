@@ -2,7 +2,7 @@
 
 import { useTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {
   AdditiveBlending,
   BufferGeometry,
@@ -41,12 +41,15 @@ function projectToScreen(
 }
 
 export function IdentityCore() {
-  const texture = useTexture(PROFILE_PHOTO);
-  texture.colorSpace = SRGBColorSpace;
-  texture.anisotropy = 8;
-  // Exact 1:1 square crop centered on subject and aerospace AI holographic graphics
-  texture.repeat.set(1, 849 / 1024);
-  texture.offset.set(0, (1024 - 849) / 1024);
+  const texture = useTexture(PROFILE_PHOTO, (tex) => {
+    if ("colorSpace" in tex) {
+      tex.colorSpace = SRGBColorSpace;
+      tex.anisotropy = 8;
+      tex.repeat.set(1, 849 / 1024);
+      tex.offset.set(0, (1024 - 849) / 1024);
+      tex.needsUpdate = true;
+    }
+  });
 
   const root = useRef<Group>(null);
   const cage = useRef<Group>(null);
@@ -58,7 +61,6 @@ export function IdentityCore() {
   const nodeRings = useRef<(Mesh | null)[]>([]);
   const lines = useRef<(Line | null)[]>([]);
 
-  const defaultColor = useMemo(() => new Color("#38bdf8"), []);
   const currentColor = useMemo(() => new Color("#38bdf8"), []);
 
   const lineGeometries = useMemo(
@@ -83,11 +85,15 @@ export function IdentityCore() {
         blending: AdditiveBlending,
         depthWrite: false,
       });
-      const line = new Line(geometry, material);
-      lines.current[index] = line;
-      return line;
+      return new Line(geometry, material);
     });
   }, [lineGeometries]);
+
+  useEffect(() => {
+    lineObjects.forEach((line, index) => {
+      lines.current[index] = line;
+    });
+  }, [lineObjects]);
 
   useFrame((state, delta) => {
     const group = root.current;
@@ -112,7 +118,6 @@ export function IdentityCore() {
     // Dynamic spatial tilt aligned with mouse pointer & active node
     group.lookAt(state.camera.position);
     if (!reduced) {
-      const pointerDamp = 1 - Math.exp(-8 * delta);
       const targetTiltY = pointerState.x * 0.22;
       const targetTiltX = -pointerState.y * 0.16;
       group.rotateY(targetTiltY);

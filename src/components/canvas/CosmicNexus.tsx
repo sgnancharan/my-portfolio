@@ -2,7 +2,7 @@
 
 import { Billboard, Text } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { useMemo, useRef, useSyncExternalStore } from "react";
+import { useRef, useSyncExternalStore } from "react";
 import { DoubleSide, Group, Mesh } from "three";
 import { viewportState } from "@/lib/scroll-state";
 import { identityInteraction, subscribeIdentity } from "@/lib/identity-state";

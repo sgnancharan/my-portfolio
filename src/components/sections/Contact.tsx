@@ -19,7 +19,7 @@ const DIRECT_CONTACTS = {
   },
   email: {
     label: TARGET_EMAIL,
-    href: `mailto:${TARGET_EMAIL}`,
+    href: `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(TARGET_EMAIL)}`,
   },
 };
 
@@ -257,37 +257,26 @@ export function Contact() {
                 DIRECT CHANNELS
               </p>
               <ul className="space-y-3">
-                {/* Email Box */}
-                <li className="rounded-2xl border border-cyan-400/30 bg-cyan-950/20 p-4 transition hover:border-cyan-300">
-                  <div className="flex items-center justify-between">
+                {/* Gmail Box */}
+                <li>
+                  <a
+                    href={DIRECT_CONTACTS.email.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group flex items-center justify-between rounded-2xl border border-cyan-400/30 bg-cyan-950/20 px-4 py-3.5 text-sm text-slate-100 transition hover:border-cyan-300 hover:bg-cyan-950/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300"
+                    aria-label={`Connect via Gmail to ${TARGET_EMAIL}`}
+                  >
                     <div className="flex items-center gap-3">
                       <Mail size={18} className="text-cyan-400" />
                       <div>
-                        <p className="font-mono text-[10px] uppercase tracking-wider text-cyan-300/80">
-                          PRIMARY EMAIL
-                        </p>
+                        <p className="font-mono text-[10px] uppercase tracking-wider text-cyan-300/80">GMAIL</p>
                         <p className="font-mono text-sm font-semibold text-slate-100">{TARGET_EMAIL}</p>
                       </div>
                     </div>
-                  </div>
-                  <div className="mt-3 flex gap-2 border-t border-white/10 pt-3">
-                    <button
-                      type="button"
-                      onClick={handleGmailMe}
-                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-cyan-400/30 bg-cyan-900/30 py-2 font-mono text-[11px] uppercase tracking-wider text-cyan-200 hover:bg-cyan-900/60 transition"
-                    >
-                      <span>Gmail Compose</span>
-                      <ExternalLink size={11} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleCopyEmail}
-                      className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/15 bg-white/5 px-3 py-2 font-mono text-[11px] text-slate-300 hover:text-white hover:border-white/30 transition"
-                    >
-                      {copied ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
-                      <span>{copied ? "Copied" : "Copy"}</span>
-                    </button>
-                  </div>
+                    <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-cyan-400 group-hover:translate-x-0.5 transition-transform">
+                      CONNECT →
+                    </span>
+                  </a>
                 </li>
 
                 {/* WhatsApp Box */}

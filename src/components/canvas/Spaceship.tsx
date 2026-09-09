@@ -1,7 +1,7 @@
 "use client";
 
 import { useFrame } from "@react-three/fiber";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import {
   AdditiveBlending,
   Group,
@@ -11,6 +11,23 @@ import {
 } from "three";
 import { sampleCameraPath } from "@/lib/camera-path";
 import { pointerState, scrollState, viewportState } from "@/lib/scroll-state";
+
+const PARTICLE_OFFSETS = Array.from({ length: 16 }, (_, idx) => {
+  const seed = (idx + 1) * 17.31;
+  const pseudo1 = Math.sin(seed) * 10000;
+  const pseudo2 = Math.cos(seed * 1.5) * 10000;
+  const pseudo3 = Math.sin(seed * 2.3) * 10000;
+  const r1 = pseudo1 - Math.floor(pseudo1);
+  const r2 = pseudo2 - Math.floor(pseudo2);
+  const r3 = pseudo3 - Math.floor(pseudo3);
+  return {
+    x: (r1 - 0.5) * 0.45,
+    z: (r2 - 0.5) * 0.45,
+    speed: 2.2 + r3 * 2.2,
+    phase: r1 * Math.PI * 2,
+    ship: idx % 2 === 0 ? ("starship" as const) : ("isro" as const),
+  };
+});
 
 export function Spaceship() {
   const starshipRoot = useRef<Group>(null);
@@ -58,19 +75,8 @@ export function Spaceship() {
   }, []);
 
   // Optimized lightweight exhaust sparks
-  const particleCount = 16;
   const particles = useRef<Mesh[]>([]);
-  const particleOffsets = useMemo(
-    () =>
-      Array.from({ length: particleCount }, (_, idx) => ({
-        x: (Math.random() - 0.5) * 0.45,
-        z: (Math.random() - 0.5) * 0.45,
-        speed: 2.2 + Math.random() * 2.2,
-        phase: Math.random() * Math.PI * 2,
-        ship: idx % 2 === 0 ? "starship" : "isro",
-      })),
-    [particleCount],
-  );
+  const particleOffsets = PARTICLE_OFFSETS;
 
   useFrame((state, delta) => {
     const star = starshipRoot.current;

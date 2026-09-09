@@ -38,14 +38,12 @@ function SqueezeCharacter({
 }: SqueezeCharacterProps) {
   const controls = useAnimationControls();
   const [displayChar, setDisplayChar] = useState(char);
-  const [isAnimating, setIsAnimating] = useState(false);
   const lastTriggerTime = useRef(0);
   const reduced = usePrefersReducedMotion();
 
   // Quantum Scramble effect
   useEffect(() => {
     if (!isScrambling || char === " ") {
-      setDisplayChar(char);
       return;
     }
 
@@ -62,7 +60,10 @@ function SqueezeCharacter({
       }
     }, 38);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      setDisplayChar(char);
+    };
   }, [isScrambling, char, charIndex]);
 
   const triggerSqueeze = useCallback(
@@ -76,34 +77,28 @@ function SqueezeCharacter({
         onCharacterInteraction(e.clientX, e.clientY);
       }
 
-      setIsAnimating(true);
-
-      controls
-        .start({
-          scaleX: [1, 0.58, 1.48, 0.82, 1.14, 1],
-          scaleY: [1, 1.54, 0.60, 1.22, 0.90, 1],
-          color: [
-            "#f8fafc",
-            "#38bdf8",
-            "#a78bfa",
-            "#38bdf8",
-            "#f8fafc",
-          ],
-          textShadow: [
-            "0 0 0px rgba(56, 189, 248, 0)",
-            "0 0 32px rgba(56, 189, 248, 0.98), 0 0 64px rgba(167, 139, 250, 0.7)",
-            "0 0 18px rgba(56, 189, 248, 0.75)",
-            "0 0 0px rgba(56, 189, 248, 0)",
-          ],
-          transition: {
-            duration: 0.58,
-            times: [0, 0.2, 0.44, 0.66, 0.86, 1],
-            ease: "easeInOut",
-          },
-        })
-        .then(() => {
-          setIsAnimating(false);
-        });
+      void controls.start({
+        scaleX: [1, 0.58, 1.48, 0.82, 1.14, 1],
+        scaleY: [1, 1.54, 0.60, 1.22, 0.90, 1],
+        color: [
+          "#f8fafc",
+          "#38bdf8",
+          "#a78bfa",
+          "#38bdf8",
+          "#f8fafc",
+        ],
+        textShadow: [
+          "0 0 0px rgba(56, 189, 248, 0)",
+          "0 0 32px rgba(56, 189, 248, 0.98), 0 0 64px rgba(167, 139, 250, 0.7)",
+          "0 0 18px rgba(56, 189, 248, 0.75)",
+          "0 0 0px rgba(56, 189, 248, 0)",
+        ],
+        transition: {
+          duration: 0.58,
+          times: [0, 0.2, 0.44, 0.66, 0.86, 1],
+          ease: "easeInOut",
+        },
+      });
     },
     [controls, reduced, onCharacterInteraction],
   );
@@ -151,34 +146,7 @@ export function JiggleTitle({ text, className = "", id }: JiggleTitleProps) {
     triggersRef.current.set(index, trigger);
   }, []);
 
-  // Spawn glowing stardust sparks that float and disperse
-  const spawnSparks = useCallback((clientX: number, clientY: number, count = 3, burst = false) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = clientX - rect.left;
-    const y = clientY - rect.top;
-
-    for (let i = 0; i < count; i++) {
-      const angle = burst ? Math.random() * Math.PI * 2 : (Math.random() - 0.5) * Math.PI;
-      const speed = burst ? 2.5 + Math.random() * 4.5 : 1.2 + Math.random() * 2.8;
-      particlesRef.current.push({
-        x,
-        y,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - (burst ? 0 : 1.2), // gentle upward float
-        size: 2.2 + Math.random() * 3.2,
-        color: SPARKLE_COLORS[Math.floor(Math.random() * SPARKLE_COLORS.length)],
-        alpha: 1,
-        life: 0,
-        maxLife: burst ? 35 + Math.random() * 25 : 22 + Math.random() * 18,
-      });
-    }
-
-    startAnimationLoop();
-  }, []);
-
-  const startAnimationLoop = () => {
+  const startAnimationLoop = useCallback(() => {
     if (animFrameRef.current !== null) return;
 
     const render = () => {
@@ -228,7 +196,34 @@ export function JiggleTitle({ text, className = "", id }: JiggleTitleProps) {
     };
 
     animFrameRef.current = requestAnimationFrame(render);
-  };
+  }, []);
+
+  // Spawn glowing stardust sparks that float and disperse
+  const spawnSparks = useCallback((clientX: number, clientY: number, count = 3, burst = false) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+
+    for (let i = 0; i < count; i++) {
+      const angle = burst ? Math.random() * Math.PI * 2 : (Math.random() - 0.5) * Math.PI;
+      const speed = burst ? 2.5 + Math.random() * 4.5 : 1.2 + Math.random() * 2.8;
+      particlesRef.current.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - (burst ? 0 : 1.2), // gentle upward float
+        size: 2.2 + Math.random() * 3.2,
+        color: SPARKLE_COLORS[Math.floor(Math.random() * SPARKLE_COLORS.length)],
+        alpha: 1,
+        life: 0,
+        maxLife: burst ? 35 + Math.random() * 25 : 22 + Math.random() * 18,
+      });
+    }
+
+    startAnimationLoop();
+  }, [startAnimationLoop]);
 
   // Sync canvas size on mount / resize
   useEffect(() => {
