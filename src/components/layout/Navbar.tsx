@@ -4,6 +4,7 @@ import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { navItems } from "@/data/navigation";
 import { profile } from "@/data/profile";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { cn } from "@/lib/cn";
 
 export function Navbar() {
@@ -58,31 +59,37 @@ export function Navbar() {
           ))}
         </ul>
 
-        <a
-          href={profile.github}
-          className="hidden font-mono text-[11px] uppercase tracking-[0.22em] text-cyan-100/90 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200/70 md:inline"
-          rel="noreferrer"
-          target="_blank"
-        >
-          GitHub
-        </a>
+        <div className="hidden items-center gap-5 md:flex">
+          <a
+            href={profile.github}
+            className="font-mono text-[11px] uppercase tracking-[0.22em] text-cyan-100/90 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200/70"
+            rel="noreferrer"
+            target="_blank"
+          >
+            GitHub
+          </a>
+          <ThemeToggle />
+        </div>
 
-        <button
-          type="button"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-white/10 text-slate-100 md:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200/70"
-          aria-expanded={open}
-          aria-controls="mobile-nav"
-          onClick={() => setOpen((value) => !value)}
-        >
-          {open ? <X size={18} aria-hidden /> : <Menu size={18} aria-hidden />}
-          <span className="sr-only">{open ? "Close menu" : "Open menu"}</span>
-        </button>
+        <div className="flex items-center gap-2.5 md:hidden">
+          <ThemeToggle />
+          <button
+            type="button"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-white/10 text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200/70 cursor-pointer"
+            aria-expanded={open}
+            aria-controls="mobile-nav"
+            onClick={() => setOpen((value) => !value)}
+          >
+            {open ? <X size={18} aria-hidden /> : <Menu size={18} aria-hidden />}
+            <span className="sr-only">{open ? "Close menu" : "Open menu"}</span>
+          </button>
+        </div>
       </nav>
 
       {open ? (
         <div
           id="mobile-nav"
-          className="border-t border-white/10 bg-[#070b12]/95 px-5 py-6 md:hidden"
+          className="border-t border-white/10 bg-[#070b12]/95 px-5 py-6 md:hidden backdrop-blur-xl"
         >
           <ul className="flex flex-col gap-4">
             {navItems.map((item) => (
@@ -105,6 +112,12 @@ export function Navbar() {
               >
                 GitHub
               </a>
+            </li>
+            <li className="pt-3 border-t border-white/10 flex items-center justify-between">
+              <span className="font-mono text-xs uppercase tracking-[0.2em] text-slate-400">
+                DISPLAY THEME
+              </span>
+              <ThemeToggle showLabel />
             </li>
           </ul>
         </div>

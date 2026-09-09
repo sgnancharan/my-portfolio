@@ -10,24 +10,29 @@ import { Skills } from "@/components/sections/Skills";
 import { Space } from "@/components/sections/Space";
 import { GrainOverlay, Vignette } from "@/components/ui/Atmosphere";
 import { IdentityModal } from "@/components/identity/IdentityModal";
+import { IsroLaunchHud } from "@/components/ui/IsroLaunchHud";
+import { LaunchTransitionWrapper } from "@/components/layout/LaunchTransitionWrapper";
 
 export default function Home() {
   return (
     <>
       <SkipLink />
+      <IsroLaunchHud />
       <SceneBackdrop />
       <Vignette />
       <GrainOverlay />
-      <Navbar />
-      <main className="relative z-10 pointer-events-none">
-        <Hero />
-        <About />
-        <Skills />
-        <Projects />
-        <Space />
-        <Contact />
-      </main>
-      <Footer />
+      <LaunchTransitionWrapper>
+        <Navbar />
+        <main className="relative z-10 pointer-events-none">
+          <Hero />
+          <About />
+          <Skills />
+          <Projects />
+          <Space />
+          <Contact />
+        </main>
+        <Footer />
+      </LaunchTransitionWrapper>
       <IdentityModal />
     </>
   );

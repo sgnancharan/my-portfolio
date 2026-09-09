@@ -60,6 +60,25 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
         (window as unknown as { __lenis?: Lenis }).__lenis = lenis;
       }
 
+      // Keep scroll locked at top during cinematic launch sequence
+      void import("@/lib/launch-intro-state").then(({ launchIntroState, subscribeLaunchIntro }) => {
+        if (cancelled) return;
+        if (launchIntroState.isActive && !launchIntroState.isComplete) {
+          lenis.stop();
+          window.scrollTo(0, 0);
+        }
+        const unsub = subscribeLaunchIntro(() => {
+          if (launchIntroState.isComplete) {
+            lenis.start();
+          }
+        });
+        const origDispose = dispose;
+        dispose = () => {
+          unsub();
+          origDispose();
+        };
+      });
+
       const onLenisScroll = (instance: Lenis) => {
         scrollState.progress = instance.progress;
         scrollState.velocity = instance.velocity;

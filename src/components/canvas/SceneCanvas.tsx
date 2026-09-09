@@ -2,32 +2,66 @@
 
 import { Canvas } from "@react-three/fiber";
 import { Preload } from "@react-three/drei";
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { CameraController } from "@/components/canvas/CameraController";
 import { CosmicNexus } from "@/components/canvas/CosmicNexus";
+import { IsroLaunchComplex } from "@/components/canvas/IsroLaunchComplex";
 import { MouseParallax } from "@/components/canvas/MouseParallax";
 import { OrbitalSystem } from "@/components/canvas/OrbitalSystem";
 import { Spaceship } from "@/components/canvas/Spaceship";
 import { StarField } from "@/components/canvas/StarField";
+import { getLaunchIntroSnapshot, subscribeLaunchIntro } from "@/lib/launch-intro-state";
 import { pointerState, viewportState } from "@/lib/scroll-state";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
+import { useTheme } from "@/components/providers/ThemeProvider";
 
 function SceneContents({ starCount }: { starCount: number }) {
+  const { theme } = useTheme();
+  const [snap, setSnap] = useState(() => getLaunchIntroSnapshot());
+
+  useEffect(() => {
+    const unsub = subscribeLaunchIntro(() => {
+      setSnap(getLaunchIntroSnapshot());
+    });
+    return unsub;
+  }, []);
+
+  // Preload background cosmos behind the orange wall as camera enters thruster
+  const showCosmos = snap.isComplete || snap.heroPreloaded || snap.cosmosLoaded > 0.5;
+  const isLight = theme === "light" && snap.isComplete;
+
+  const bgColor = isLight ? "#f0f4f8" : "#05070c";
+  const fogNear = isLight ? 14 : 12;
+  const fogFar = isLight ? 42 : 36;
+
   return (
     <>
-      <color attach="background" args={["#05070c"]} />
-      <fog attach="fog" args={["#05070c", 12, 36]} />
-      <ambientLight intensity={0.18} />
-      <directionalLight position={[6, 8, 4]} intensity={0.55} color="#d7e6f2" />
-      <directionalLight position={[-8, -2, -6]} intensity={0.22} color="#6d6aa3" />
+      <color attach="background" args={[bgColor]} />
+      <fog attach="fog" args={[bgColor, fogNear, fogFar]} />
+      <ambientLight intensity={isLight ? 0.65 : 0.18} />
+      <directionalLight
+        position={[6, 8, 4]}
+        intensity={isLight ? 0.95 : 0.55}
+        color={isLight ? "#ffffff" : "#d7e6f2"}
+      />
+      <directionalLight
+        position={[-8, -2, -6]}
+        intensity={isLight ? 0.45 : 0.22}
+        color={isLight ? "#94a3b8" : "#6d6aa3"}
+      />
       <CameraController />
-      <MouseParallax>
-        <StarField count={starCount} />
-        <OrbitalSystem />
-        <CosmicNexus />
-      </MouseParallax>
-      <Spaceship />
+      <IsroLaunchComplex />
+      {showCosmos && (
+        <>
+          <MouseParallax>
+            <StarField count={starCount} />
+            <OrbitalSystem />
+            <CosmicNexus />
+          </MouseParallax>
+          <Spaceship />
+        </>
+      )}
       <Preload all />
     </>
   );

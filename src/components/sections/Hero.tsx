@@ -26,7 +26,7 @@ export function Hero() {
           className="mt-6 sm:mt-8 flex flex-col items-center"
         >
           <p className="font-mono text-[11px] uppercase tracking-[0.36em] text-cyan-200/80">
-            Origin / 00
+            MISSION INITIALIZED // ORIGIN 00
           </p>
           <JiggleTitle
             id="hero-title"
